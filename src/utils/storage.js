@@ -84,7 +84,7 @@ export function isStorageAvailable() {
     window.localStorage.setItem(test, test);
     window.localStorage.removeItem(test);
     return true;
-  } catch (error) {
+  } catch {
     return false;
   }
 }

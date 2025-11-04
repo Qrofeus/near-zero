@@ -1,0 +1,203 @@
+/**
+ * TaskForm Component
+ * Form for creating new tasks with native date/time inputs
+ */
+
+import { useState } from 'react';
+
+/**
+ * TaskForm - A controlled form component for creating tasks
+ * @param {function} onSubmit - Callback when form is submitted with task data
+ * @returns {JSX.Element}
+ */
+function TaskForm({ onSubmit }) {
+  // useState hook: Creates state variables that persist across re-renders
+  // Each call returns [currentValue, setterFunction]
+  const [title, setTitle] = useState('');
+  const [description, setDescription] = useState('');
+  const [dateString, setDateString] = useState('');
+  const [timeString, setTimeString] = useState('');
+  const [priority, setPriority] = useState(2); // Default: Medium
+
+  /**
+   * Handle form submission
+   * @param {Event} e - Form submit event
+   */
+  const handleSubmit = (e) => {
+    // Prevent default form submission (which would reload the page)
+    e.preventDefault();
+
+    // Only submit if required fields are filled
+    if (!title.trim() || !dateString || !timeString) {
+      return;
+    }
+
+    // Call parent's onSubmit with form data
+    onSubmit({
+      title: title.trim(),
+      description: description.trim(),
+      dateString,
+      timeString,
+      priority: Number(priority) // Ensure priority is a number
+    });
+
+    // Clear form after submission
+    setTitle('');
+    setDescription('');
+    setDateString('');
+    setTimeString('');
+    setPriority(2);
+  };
+
+  return (
+    <form onSubmit={handleSubmit} style={styles.form}>
+      {/* Title input */}
+      <div style={styles.field}>
+        <label htmlFor="task-title" style={styles.label}>
+          Task Title *
+        </label>
+        <input
+          id="task-title"
+          type="text"
+          value={title}
+          onChange={(e) => setTitle(e.target.value)}
+          required
+          placeholder="What needs to be done?"
+          style={styles.input}
+        />
+      </div>
+
+      {/* Description textarea */}
+      <div style={styles.field}>
+        <label htmlFor="task-description" style={styles.label}>
+          Description
+        </label>
+        <textarea
+          id="task-description"
+          value={description}
+          onChange={(e) => setDescription(e.target.value)}
+          placeholder="Add details (max 300 characters)"
+          maxLength={300}
+          rows={3}
+          style={styles.textarea}
+        />
+      </div>
+
+      {/* Deadline inputs: Date and Time side by side */}
+      <div style={styles.dateTimeRow}>
+        <div style={styles.field}>
+          <label htmlFor="task-date" style={styles.label}>
+            Deadline Date *
+          </label>
+          <input
+            id="task-date"
+            type="date"
+            value={dateString}
+            onChange={(e) => setDateString(e.target.value)}
+            required
+            style={styles.input}
+          />
+        </div>
+
+        <div style={styles.field}>
+          <label htmlFor="task-time" style={styles.label}>
+            Deadline Time *
+          </label>
+          <input
+            id="task-time"
+            type="time"
+            value={timeString}
+            onChange={(e) => setTimeString(e.target.value)}
+            required
+            style={styles.input}
+          />
+        </div>
+      </div>
+
+      {/* Priority select */}
+      <div style={styles.field}>
+        <label htmlFor="task-priority" style={styles.label}>
+          Priority
+        </label>
+        <select
+          id="task-priority"
+          value={priority}
+          onChange={(e) => setPriority(e.target.value)}
+          style={styles.select}
+        >
+          <option value={1}>High</option>
+          <option value={2}>Medium</option>
+          <option value={3}>Low</option>
+        </select>
+      </div>
+
+      {/* Submit button */}
+      <button type="submit" style={styles.button}>
+        Add Task
+      </button>
+    </form>
+  );
+}
+
+// Basic inline styles for the form
+const styles = {
+  form: {
+    backgroundColor: '#f9f9f9',
+    padding: '20px',
+    borderRadius: '8px',
+    marginBottom: '20px',
+    border: '1px solid #ddd'
+  },
+  field: {
+    marginBottom: '15px',
+    display: 'flex',
+    flexDirection: 'column'
+  },
+  label: {
+    marginBottom: '5px',
+    fontWeight: 'bold',
+    fontSize: '14px',
+    color: '#333'
+  },
+  input: {
+    padding: '8px 12px',
+    fontSize: '14px',
+    border: '1px solid #ccc',
+    borderRadius: '4px',
+    outline: 'none'
+  },
+  textarea: {
+    padding: '8px 12px',
+    fontSize: '14px',
+    border: '1px solid #ccc',
+    borderRadius: '4px',
+    outline: 'none',
+    fontFamily: 'inherit',
+    resize: 'vertical'
+  },
+  select: {
+    padding: '8px 12px',
+    fontSize: '14px',
+    border: '1px solid #ccc',
+    borderRadius: '4px',
+    outline: 'none',
+    backgroundColor: 'white'
+  },
+  dateTimeRow: {
+    display: 'flex',
+    gap: '15px'
+  },
+  button: {
+    padding: '10px 20px',
+    fontSize: '16px',
+    fontWeight: 'bold',
+    color: 'white',
+    backgroundColor: '#007bff',
+    border: 'none',
+    borderRadius: '4px',
+    cursor: 'pointer',
+    width: '100%'
+  }
+};
+
+export default TaskForm;
