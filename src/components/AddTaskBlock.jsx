@@ -14,10 +14,10 @@ function AddTaskBlock({ onAddTask }) {
     <button
       onClick={onAddTask}
       style={styles.block}
-      aria-label="Add new task"
+      aria-label="Add new task (press Q)"
     >
       <span style={styles.icon}>+</span>
-      <span style={styles.text}>Add New Task</span>
+      <span style={styles.text}>Add New Task (Q)</span>
     </button>
   );
 }

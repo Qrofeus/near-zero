@@ -25,11 +25,17 @@ describe('TaskForm', () => {
 
     render(<TaskForm onSubmit={onSubmit} />);
 
-    // Fill form
+    // Fill form (clear date/time first since they're auto-filled)
     await user.type(screen.getByLabelText(/title/i), 'Test Task');
     await user.type(screen.getByLabelText(/description/i), 'Test description');
-    await user.type(screen.getByLabelText(/deadline date/i), '2025-12-31');
-    await user.type(screen.getByLabelText(/deadline time/i), '23:59');
+
+    const dateInput = screen.getByLabelText(/deadline date/i);
+    const timeInput = screen.getByLabelText(/deadline time/i);
+    await user.clear(dateInput);
+    await user.type(dateInput, '2025-12-31');
+    await user.clear(timeInput);
+    await user.type(timeInput, '23:59');
+
     await user.selectOptions(screen.getByLabelText(/priority/i), '1');
 
     // Submit
@@ -52,16 +58,26 @@ describe('TaskForm', () => {
 
     const titleInput = screen.getByLabelText(/title/i);
     const descInput = screen.getByLabelText(/description/i);
+    const dateInput = screen.getByLabelText(/deadline date/i);
+    const timeInput = screen.getByLabelText(/deadline time/i);
 
     await user.type(titleInput, 'Test Task');
     await user.type(descInput, 'Test description');
-    await user.type(screen.getByLabelText(/deadline date/i), '2025-12-31');
-    await user.type(screen.getByLabelText(/deadline time/i), '23:59');
+    await user.clear(dateInput);
+    await user.type(dateInput, '2025-12-31');
+    await user.clear(timeInput);
+    await user.type(timeInput, '23:59');
 
     await user.click(screen.getByRole('button', { name: /add task/i }));
 
+    // Title and description should be cleared
     expect(titleInput).toHaveValue('');
     expect(descInput).toHaveValue('');
+
+    // Date and time should reset to next day 6 PM (not empty)
+    expect(timeInput).toHaveValue('18:00');
+    // Date should be tomorrow (we can't test exact value as it changes daily)
+    expect(dateInput.value).toBeTruthy();
   });
 
   it('does not submit if title is empty', async () => {
@@ -85,5 +101,19 @@ describe('TaskForm', () => {
 
     const prioritySelect = screen.getByLabelText(/priority/i);
     expect(prioritySelect).toHaveValue('2');
+  });
+
+  it('auto-fills date and time to next day 6 PM', () => {
+    render(<TaskForm onSubmit={() => {}} />);
+
+    const dateInput = screen.getByLabelText(/deadline date/i);
+    const timeInput = screen.getByLabelText(/deadline time/i);
+
+    // Time should be 18:00 (6 PM)
+    expect(timeInput).toHaveValue('18:00');
+
+    // Date should be set (tomorrow)
+    expect(dateInput.value).toBeTruthy();
+    expect(dateInput.value).toMatch(/^\d{4}-\d{2}-\d{2}$/); // YYYY-MM-DD format
   });
 });

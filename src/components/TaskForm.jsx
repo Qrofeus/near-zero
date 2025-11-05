@@ -3,7 +3,28 @@
  * Form for creating new tasks with native date/time inputs
  */
 
-import { useState } from 'react';
+import { useState, useRef, useEffect } from 'react';
+
+/**
+ * Get default deadline (next day 6 PM local time)
+ * @returns {object} { dateString, timeString }
+ */
+function getDefaultDeadline() {
+  const tomorrow = new Date();
+  tomorrow.setDate(tomorrow.getDate() + 1);
+  tomorrow.setHours(18, 0, 0, 0); // 6 PM
+
+  // Format for input[type="date"]: YYYY-MM-DD in local timezone
+  const year = tomorrow.getFullYear();
+  const month = String(tomorrow.getMonth() + 1).padStart(2, '0');
+  const day = String(tomorrow.getDate()).padStart(2, '0');
+  const dateString = `${year}-${month}-${day}`;
+
+  // Format for input[type="time"]: HH:MM
+  const timeString = '18:00';
+
+  return { dateString, timeString };
+}
 
 /**
  * TaskForm - A controlled form component for creating tasks
@@ -11,13 +32,27 @@ import { useState } from 'react';
  * @returns {JSX.Element}
  */
 function TaskForm({ onSubmit }) {
+  const defaults = getDefaultDeadline();
+
   // useState hook: Creates state variables that persist across re-renders
   // Each call returns [currentValue, setterFunction]
   const [title, setTitle] = useState('');
   const [description, setDescription] = useState('');
-  const [dateString, setDateString] = useState('');
-  const [timeString, setTimeString] = useState('');
+  const [dateString, setDateString] = useState(defaults.dateString);
+  const [timeString, setTimeString] = useState(defaults.timeString);
   const [priority, setPriority] = useState(2); // Default: Medium
+
+  // useRef: Create a reference to the title input for auto-focus
+  const titleInputRef = useRef(null);
+
+  /**
+   * useEffect: Auto-focus title input when form is shown
+   */
+  useEffect(() => {
+    if (titleInputRef.current) {
+      titleInputRef.current.focus();
+    }
+  }, []); // Empty array = run once on mount
 
   /**
    * Handle form submission
@@ -41,11 +76,12 @@ function TaskForm({ onSubmit }) {
       priority: Number(priority) // Ensure priority is a number
     });
 
-    // Clear form after submission
+    // Clear form after submission and reset to next day 6 PM
+    const newDefaults = getDefaultDeadline();
     setTitle('');
     setDescription('');
-    setDateString('');
-    setTimeString('');
+    setDateString(newDefaults.dateString);
+    setTimeString(newDefaults.timeString);
     setPriority(2);
   };
 
@@ -57,6 +93,7 @@ function TaskForm({ onSubmit }) {
           Task Title *
         </label>
         <input
+          ref={titleInputRef}
           id="task-title"
           type="text"
           value={title}

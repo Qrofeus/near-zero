@@ -6,12 +6,15 @@
 import { useState, useEffect } from 'react';
 import TaskForm from './components/TaskForm';
 import TaskList from './components/TaskList';
+import SortToggle from './components/SortToggle';
 import { localToUTC, isInPast } from './utils/datetime';
 import { getAllTasks } from './utils/tasks';
 import {
   createTask,
   deleteTask as removeTask
 } from './utils/taskStorage';
+import { sortTasks } from './utils/sorting';
+import { getSortMode, setSortMode } from './utils/preferences';
 
 function App() {
   /**
@@ -30,6 +33,12 @@ function App() {
   const [showForm, setShowForm] = useState(false);
 
   /**
+   * sortMode: Current sorting mode (deadline or priority)
+   * Loaded from localStorage on mount
+   */
+  const [sortMode, setSortModeState] = useState(() => getSortMode());
+
+  /**
    * useEffect: Runs side effects in function components
    * The empty array [] means this runs only once when component mounts
    * Similar to componentDidMount in class components
@@ -39,6 +48,40 @@ function App() {
     const loadedTasks = getAllTasks();
     setTasks(loadedTasks);
   }, []); // Empty dependency array = run once on mount
+
+  /**
+   * useEffect: Add keyboard shortcuts
+   * 'Q' key opens the form and focuses on title input
+   * 'Esc' key closes the form
+   */
+  useEffect(() => {
+    const handleKeyPress = (e) => {
+      // Handle 'Q' key to open form
+      if (
+        (e.key === 'q' || e.key === 'Q') &&
+        !e.ctrlKey &&
+        !e.metaKey &&
+        !e.altKey &&
+        e.target.tagName !== 'INPUT' &&
+        e.target.tagName !== 'TEXTAREA'
+      ) {
+        e.preventDefault(); // Prevent 'q' from being typed
+        setShowForm(true);
+      }
+
+      // Handle 'Esc' key to close form
+      if (e.key === 'Escape' && showForm) {
+        setShowForm(false);
+      }
+    };
+
+    window.addEventListener('keydown', handleKeyPress);
+
+    // Cleanup: remove event listener when component unmounts
+    return () => {
+      window.removeEventListener('keydown', handleKeyPress);
+    };
+  }, [showForm]); // Include showForm in dependencies for Esc handler
 
   /**
    * Handle form submission for new task
@@ -129,6 +172,20 @@ function App() {
     }
   };
 
+  /**
+   * Handle sort mode change
+   * Saves to localStorage and updates state
+   */
+  const handleSortModeChange = (newMode) => {
+    setSortMode(newMode);
+    setSortModeState(newMode);
+  };
+
+  /**
+   * Get sorted tasks based on current sort mode
+   */
+  const sortedTasks = sortTasks(tasks, sortMode);
+
   return (
     <div style={styles.app}>
       <header style={styles.header}>
@@ -137,9 +194,9 @@ function App() {
           <button
             onClick={() => setShowForm(true)}
             style={styles.addButton}
-            aria-label="Add new task"
+            aria-label="Add new task (press Q)"
           >
-            + Add Task
+            + Add Task (Q)
           </button>
         </div>
         <p style={styles.subtitle}>Privacy-first task manager with deadline tracking</p>
@@ -163,9 +220,17 @@ function App() {
           </div>
         )}
 
+        {/* Sort mode toggle */}
+        {tasks.length > 0 && (
+          <SortToggle
+            currentMode={sortMode}
+            onModeChange={handleSortModeChange}
+          />
+        )}
+
         {/* Task list */}
         <TaskList
-          tasks={tasks}
+          tasks={sortedTasks}
           onEdit={handleEditTask}
           onDelete={handleDeleteTask}
           onComplete={handleCompleteTask}
