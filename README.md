@@ -1,8 +1,8 @@
-# DueList
+# NearZero
 
 A minimalist, privacy-first task manager that visually brings your deadlines to life.
 
-DueList is a browser-based task management web application built with React. Its core feature is its focus on **urgency visualization**. Tasks aren't just static items; they visually change color, pulse, and animate as their deadlines approach, giving you an at-a-glance understanding of what needs your attention.
+NearZero is a browser-based task management web application built with React. Its core feature is its focus on **urgency visualization**. Tasks aren't just static items; they visually change color, pulse, and animate as their deadlines approach, giving you an at-a-glance understanding of what needs your attention.
 
 This is a **privacy-first** application. All data is stored *only* in your browser's Local Storage. There are no accounts, no logins, and no data is ever sent to a server.
 
@@ -41,11 +41,11 @@ This project was bootstrapped with Vite. To get it running locally:
 1.  **Clone the repository:**
     *(Note: You will need to create a GitHub repository for this first. Replace `[YOUR_USERNAME]` with your actual username.)*
     ```sh
-    git clone https://github.com/[YOUR_USERNAME]/due-list.git
+    git clone https://github.com/[YOUR_USERNAME]/near-zero.git
     ```
 2.  **Navigate to the project directory:**
     ```sh
-    cd due-list
+    cd near-zero
     ```
 3.  **Install dependencies:**
     ```sh

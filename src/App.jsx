@@ -7,6 +7,10 @@ import { useState, useEffect } from 'react';
 import TaskForm from './components/TaskForm';
 import TaskList from './components/TaskList';
 import SortToggle from './components/SortToggle';
+import Modal from './components/Modal';
+import AlertDialog from './components/AlertDialog';
+import ConfirmDialog from './components/ConfirmDialog';
+import MessageBar from './components/MessageBar';
 import { localToUTC, isInPast } from './utils/datetime';
 import { getAllTasks } from './utils/tasks';
 import {
@@ -15,6 +19,7 @@ import {
 } from './utils/taskStorage';
 import { sortTasks } from './utils/sorting';
 import { getSortMode, setSortMode } from './utils/preferences';
+import { needsUrgentRefresh } from './utils/urgency';
 
 function App() {
   /**
@@ -37,6 +42,43 @@ function App() {
    * Loaded from localStorage on mount
    */
   const [sortMode, setSortModeState] = useState(() => getSortMode());
+
+  /**
+   * Modal state management
+   */
+  const [alertDialog, setAlertDialog] = useState({
+    isOpen: false,
+    title: '',
+    message: '',
+    variant: 'primary'
+  });
+
+  const [confirmDialog, setConfirmDialog] = useState({
+    isOpen: false,
+    title: '',
+    message: '',
+    variant: 'primary',
+    onConfirm: () => {}
+  });
+
+  /**
+   * Helper functions for showing modals
+   */
+  const showAlert = (title, message, variant = 'primary') => {
+    setAlertDialog({ isOpen: true, title, message, variant });
+  };
+
+  const showConfirm = (title, message, onConfirm, variant = 'primary') => {
+    setConfirmDialog({ isOpen: true, title, message, onConfirm, variant });
+  };
+
+  const closeAlert = () => {
+    setAlertDialog({ ...alertDialog, isOpen: false });
+  };
+
+  const closeConfirm = () => {
+    setConfirmDialog({ ...confirmDialog, isOpen: false });
+  };
 
   /**
    * useEffect: Runs side effects in function components
@@ -84,6 +126,29 @@ function App() {
   }, [showForm]); // Include showForm in dependencies for Esc handler
 
   /**
+   * useEffect: Auto-refresh to update relative times and urgency colors
+   * Normal: 5-minute interval
+   * Urgent: 1-minute interval if any task ≤ 1 hour away or overdue
+   */
+  useEffect(() => {
+    if (tasks.length === 0) return;
+
+    // Determine refresh interval based on task urgency
+    const isUrgent = needsUrgentRefresh(tasks);
+    const interval = isUrgent ? 60 * 1000 : 5 * 60 * 1000; // 1min or 5min in ms
+
+    // Force re-render by updating tasks from localStorage
+    const timer = setInterval(() => {
+      setTasks(getAllTasks());
+    }, interval);
+
+    // Cleanup: clear interval when component unmounts or dependencies change
+    return () => {
+      clearInterval(timer);
+    };
+  }, [tasks]); // Re-run when tasks change to adjust interval
+
+  /**
    * Handle form submission for new task
    * @param {object} formData - { title, description, dateString, timeString, priority }
    */
@@ -93,7 +158,7 @@ function App() {
 
     // Validate deadline is not in past
     if (isInPast(deadlineUTC)) {
-      alert('Deadline cannot be in the past');
+      showAlert('Invalid Deadline', 'Deadline cannot be in the past', 'warning');
       return;
     }
 
@@ -106,7 +171,7 @@ function App() {
     });
 
     if (!result.success) {
-      alert(`Error: ${result.errors.join(', ')}`);
+      showAlert('Error', `Failed to create task: ${result.errors.join(', ')}`, 'danger');
       return;
     }
 
@@ -123,7 +188,7 @@ function App() {
    * Full edit functionality will come in later phases
    */
   const handleEditTask = (taskId) => {
-    alert(`Edit functionality for task ${taskId} will be implemented in later phases`);
+    showAlert('Coming Soon', `Edit functionality for task ${taskId} will be implemented in later phases`);
   };
 
   /**
@@ -135,18 +200,21 @@ function App() {
     const task = tasks.find(t => t.id === taskId);
     if (!task) return;
 
-    // Confirm deletion
-    if (!window.confirm(`Delete task "${task.title}"?`)) {
-      return;
-    }
-
-    // Delete from localStorage and update state
-    const result = removeTask(taskId);
-    if (result.success) {
-      setTasks(getAllTasks());
-    } else {
-      alert(`Failed to delete: ${result.errors.join(', ')}`);
-    }
+    // Show confirmation dialog
+    showConfirm(
+      'Delete Task',
+      `Are you sure you want to delete "${task.title}"? This action cannot be undone.`,
+      () => {
+        // Delete from localStorage and update state
+        const result = removeTask(taskId);
+        if (result.success) {
+          setTasks(getAllTasks());
+        } else {
+          showAlert('Error', `Failed to delete: ${result.errors.join(', ')}`, 'danger');
+        }
+      },
+      'danger'
+    );
   };
 
   /**
@@ -158,18 +226,21 @@ function App() {
     const task = tasks.find(t => t.id === taskId);
     if (!task) return;
 
-    // Confirm completion
-    if (!window.confirm(`Mark "${task.title}" as complete?`)) {
-      return;
-    }
-
-    // Mark complete (sets isCompleted=true then removes)
-    const result = removeTask(taskId);
-    if (result.success) {
-      setTasks(getAllTasks());
-    } else {
-      alert(`Failed to complete: ${result.errors.join(', ')}`);
-    }
+    // Show confirmation dialog
+    showConfirm(
+      'Complete Task',
+      `Mark "${task.title}" as complete?`,
+      () => {
+        // Mark complete (sets isCompleted=true then removes)
+        const result = removeTask(taskId);
+        if (result.success) {
+          setTasks(getAllTasks());
+        } else {
+          showAlert('Error', `Failed to complete: ${result.errors.join(', ')}`, 'danger');
+        }
+      },
+      'primary'
+    );
   };
 
   /**
@@ -190,7 +261,7 @@ function App() {
     <div style={styles.app}>
       <header style={styles.header}>
         <div style={styles.headerContent}>
-          <h1 style={styles.title}>DueList</h1>
+          <h1 style={styles.title}>NearZero</h1>
           <button
             onClick={() => setShowForm(true)}
             style={styles.addButton}
@@ -203,23 +274,6 @@ function App() {
       </header>
 
       <main style={styles.main}>
-        {/* Task creation form - shown/hidden based on showForm state */}
-        {showForm && (
-          <div style={styles.formContainer}>
-            <div style={styles.formHeader}>
-              <h2 style={styles.formTitle}>Create New Task</h2>
-              <button
-                onClick={() => setShowForm(false)}
-                style={styles.closeButton}
-                aria-label="Close form"
-              >
-                ✕
-              </button>
-            </div>
-            <TaskForm onSubmit={handleAddTask} />
-          </div>
-        )}
-
         {/* Sort mode toggle */}
         {tasks.length > 0 && (
           <SortToggle
@@ -238,11 +292,42 @@ function App() {
         />
       </main>
 
-      <footer style={styles.footer}>
-        <p style={styles.footerText}>
-          All data stored locally in your browser. {tasks.length} task{tasks.length !== 1 ? 's' : ''} total.
-        </p>
-      </footer>
+      {/* Alert Dialog */}
+      <AlertDialog
+        isOpen={alertDialog.isOpen}
+        onClose={closeAlert}
+        title={alertDialog.title}
+        message={alertDialog.message}
+        variant={alertDialog.variant}
+      />
+
+      {/* Confirm Dialog */}
+      <ConfirmDialog
+        isOpen={confirmDialog.isOpen}
+        onClose={closeConfirm}
+        onConfirm={confirmDialog.onConfirm}
+        title={confirmDialog.title}
+        message={confirmDialog.message}
+        variant={confirmDialog.variant}
+        confirmText={confirmDialog.variant === 'danger' ? 'Delete' : 'Confirm'}
+      />
+
+      {/* Task Form Modal */}
+      <Modal isOpen={showForm} onClose={() => setShowForm(false)} maxWidth="600px">
+        <div style={styles.formContainer}>
+          <div style={styles.formHeader}>
+            <h2 style={styles.formTitle}>Create New Task</h2>
+            <button
+              onClick={() => setShowForm(false)}
+              style={styles.closeButton}
+              aria-label="Close form"
+            >
+              ✕
+            </button>
+          </div>
+          <TaskForm onSubmit={handleAddTask} />
+        </div>
+      </Modal>
     </div>
   );
 }
@@ -281,7 +366,8 @@ const styles = {
     border: '2px solid white',
     borderRadius: '6px',
     cursor: 'pointer',
-    transition: 'all 0.2s'
+    transition: 'all 0.2s',
+    outline: 'none'
   },
   subtitle: {
     margin: '5px 0 0 0',
@@ -296,12 +382,7 @@ const styles = {
     padding: '20px'
   },
   formContainer: {
-    backgroundColor: 'white',
-    border: '2px solid #007bff',
-    borderRadius: '8px',
-    padding: '20px',
-    marginBottom: '20px',
-    boxShadow: '0 4px 8px rgba(0,0,0,0.15)'
+    padding: '24px'
   },
   formHeader: {
     display: 'flex',
@@ -319,20 +400,11 @@ const styles = {
     fontSize: '20px',
     color: '#666',
     backgroundColor: 'transparent',
-    border: 'none',
+    border: '2px solid transparent',
     cursor: 'pointer',
     borderRadius: '4px',
-    lineHeight: 1
-  },
-  footer: {
-    backgroundColor: '#333',
-    color: 'white',
-    padding: '15px',
-    textAlign: 'center'
-  },
-  footerText: {
-    margin: 0,
-    fontSize: '14px'
+    lineHeight: 1,
+    outline: 'none'
   }
 };
 

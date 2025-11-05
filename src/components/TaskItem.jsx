@@ -5,6 +5,7 @@
  */
 
 import { formatAbsoluteTime } from '../utils/datetime';
+import { getUrgencyColor, formatRelativeTime } from '../utils/urgency';
 
 /**
  * TaskItem - Displays a single task
@@ -51,8 +52,14 @@ function TaskItem({ task, onEdit, onDelete, onComplete }) {
     }
   };
 
+  const urgencyColor = getUrgencyColor(task.deadline);
+  const relativeTime = formatRelativeTime(task.deadline);
+
   return (
-    <div style={styles.card}>
+    <div style={{
+      ...styles.card,
+      borderLeft: `4px solid ${urgencyColor}`
+    }}>
       {/* Header: Title and Priority */}
       <div style={styles.header}>
         <h3 style={styles.title}>{task.title}</h3>
@@ -71,9 +78,14 @@ function TaskItem({ task, onEdit, onDelete, onComplete }) {
         <p style={styles.description}>{task.description}</p>
       )}
 
-      {/* Deadline - converted from UTC to local time */}
+      {/* Deadline - show relative time prominently, absolute time secondary */}
       <div style={styles.deadline}>
-        <strong>Due:</strong> {formatAbsoluteTime(task.deadline)}
+        <div style={{ ...styles.relativeTime, color: urgencyColor }}>
+          {relativeTime}
+        </div>
+        <div style={styles.absoluteTime}>
+          {formatAbsoluteTime(task.deadline)}
+        </div>
       </div>
 
       {/* Action buttons */}
@@ -142,9 +154,16 @@ const styles = {
     whiteSpace: 'nowrap'
   },
   deadline: {
-    fontSize: '14px',
-    color: '#555',
     marginBottom: '10px'
+  },
+  relativeTime: {
+    fontSize: '16px',
+    fontWeight: 'bold',
+    marginBottom: '4px'
+  },
+  absoluteTime: {
+    fontSize: '12px',
+    color: '#777'
   },
   actions: {
     display: 'flex',
@@ -154,10 +173,11 @@ const styles = {
   button: {
     padding: '6px 12px',
     fontSize: '14px',
-    border: 'none',
+    border: '2px solid transparent',
     borderRadius: '4px',
     cursor: 'pointer',
-    fontWeight: 'bold'
+    fontWeight: 'bold',
+    outline: 'none'
   },
   completeButton: {
     backgroundColor: '#28a745',

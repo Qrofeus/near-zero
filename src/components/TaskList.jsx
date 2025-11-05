@@ -1,11 +1,13 @@
 /**
  * TaskList Component
  * Renders a list of tasks using TaskItem components
+ * Groups overdue tasks separately at the top
  * Always shows AddTaskBlock at the end for easy task creation
  */
 
 import TaskItem from './TaskItem';
 import AddTaskBlock from './AddTaskBlock';
+import { isOverdue } from '../utils/urgency';
 
 /**
  * TaskList - Displays tasks and add task block
@@ -17,20 +19,45 @@ import AddTaskBlock from './AddTaskBlock';
  * @returns {JSX.Element}
  */
 function TaskList({ tasks, onEdit, onDelete, onComplete, onAddTask }) {
+  // Separate tasks into overdue and upcoming
+  const overdueTasks = tasks.filter(task => isOverdue(task.deadline));
+  const upcomingTasks = tasks.filter(task => !isOverdue(task.deadline));
+
   return (
     <div style={styles.list}>
-      {/* Render each task using TaskItem component */}
-      {/* The "key" prop is required by React for list items */}
-      {/* It helps React identify which items have changed for efficient updates */}
-      {tasks.map((task) => (
-        <TaskItem
-          key={task.id}
-          task={task}
-          onEdit={onEdit}
-          onDelete={onDelete}
-          onComplete={onComplete}
-        />
-      ))}
+      {/* Overdue tasks section */}
+      {overdueTasks.length > 0 && (
+        <div style={styles.section}>
+          <h2 style={styles.sectionHeader}>Overdue</h2>
+          {overdueTasks.map((task) => (
+            <TaskItem
+              key={task.id}
+              task={task}
+              onEdit={onEdit}
+              onDelete={onDelete}
+              onComplete={onComplete}
+            />
+          ))}
+        </div>
+      )}
+
+      {/* Upcoming tasks section */}
+      {upcomingTasks.length > 0 && (
+        <div style={styles.section}>
+          {overdueTasks.length > 0 && (
+            <h2 style={styles.sectionHeader}>Upcoming</h2>
+          )}
+          {upcomingTasks.map((task) => (
+            <TaskItem
+              key={task.id}
+              task={task}
+              onEdit={onEdit}
+              onDelete={onDelete}
+              onComplete={onComplete}
+            />
+          ))}
+        </div>
+      )}
 
       {/* Always show AddTaskBlock at end, even when list is empty */}
       <AddTaskBlock onAddTask={onAddTask} />
@@ -42,6 +69,18 @@ const styles = {
   list: {
     display: 'flex',
     flexDirection: 'column'
+  },
+  section: {
+    marginBottom: '20px'
+  },
+  sectionHeader: {
+    fontSize: '20px',
+    fontWeight: 'bold',
+    color: '#333',
+    marginBottom: '15px',
+    marginTop: '10px',
+    paddingBottom: '8px',
+    borderBottom: '2px solid #ddd'
   }
 };
 

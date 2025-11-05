@@ -86,7 +86,7 @@ function TaskForm({ onSubmit }) {
   };
 
   return (
-    <form onSubmit={handleSubmit} style={styles.form}>
+    <form onSubmit={handleSubmit} style={styles.form} autoComplete="off">
       {/* Title input */}
       <div style={styles.field}>
         <label htmlFor="task-title" style={styles.label}>
@@ -101,6 +101,7 @@ function TaskForm({ onSubmit }) {
           required
           placeholder="What needs to be done?"
           style={styles.input}
+          autoComplete="off"
         />
       </div>
 
@@ -117,6 +118,7 @@ function TaskForm({ onSubmit }) {
           maxLength={300}
           rows={3}
           style={styles.textarea}
+          autoComplete="off"
         />
       </div>
 
@@ -133,6 +135,7 @@ function TaskForm({ onSubmit }) {
             onChange={(e) => setDateString(e.target.value)}
             required
             style={styles.input}
+            autoComplete="off"
           />
         </div>
 
@@ -147,6 +150,7 @@ function TaskForm({ onSubmit }) {
             onChange={(e) => setTimeString(e.target.value)}
             required
             style={styles.input}
+            autoComplete="off"
           />
         </div>
       </div>
@@ -161,6 +165,7 @@ function TaskForm({ onSubmit }) {
           value={priority}
           onChange={(e) => setPriority(e.target.value)}
           style={styles.select}
+          autoComplete="off"
         >
           <option value={1}>High</option>
           <option value={2}>Medium</option>
@@ -230,10 +235,11 @@ const styles = {
     fontWeight: 'bold',
     color: 'white',
     backgroundColor: '#007bff',
-    border: 'none',
+    border: '2px solid transparent',
     borderRadius: '4px',
     cursor: 'pointer',
-    width: '100%'
+    width: '100%',
+    outline: 'none'
   }
 };
 

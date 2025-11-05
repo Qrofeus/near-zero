@@ -64,6 +64,7 @@ const styles = {
     cursor: 'pointer',
     transition: 'all 0.2s',
     borderRight: '1px solid #007bff',
+    outline: 'none'
   },
   buttonActive: {
     backgroundColor: '#007bff',

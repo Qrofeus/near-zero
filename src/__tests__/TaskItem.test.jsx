@@ -34,7 +34,7 @@ describe('TaskItem', () => {
     expect(screen.getByText('Test description')).toBeInTheDocument();
   });
 
-  it('displays deadline in local time format', () => {
+  it('displays deadline with relative and absolute time', () => {
     render(
       <TaskItem
         task={mockTask}
@@ -44,7 +44,9 @@ describe('TaskItem', () => {
       />
     );
 
-    // Should display formatted deadline (exact format may vary based on timezone)
+    // Should display relative time ("Due in ...")
+    expect(screen.getByText(/Due in/i)).toBeInTheDocument();
+    // Should display absolute formatted deadline (exact format may vary based on timezone)
     expect(screen.getByText(/Dec 31, 2025/i)).toBeInTheDocument();
   });
 
