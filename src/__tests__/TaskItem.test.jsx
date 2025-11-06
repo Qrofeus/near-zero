@@ -24,6 +24,7 @@ describe('TaskItem', () => {
     render(
       <TaskItem
         task={mockTask}
+        onClick={() => {}}
         onEdit={() => {}}
         onDelete={() => {}}
         onComplete={() => {}}
@@ -38,6 +39,7 @@ describe('TaskItem', () => {
     render(
       <TaskItem
         task={mockTask}
+        onClick={() => {}}
         onEdit={() => {}}
         onDelete={() => {}}
         onComplete={() => {}}
@@ -54,6 +56,7 @@ describe('TaskItem', () => {
     render(
       <TaskItem
         task={mockTask}
+        onClick={() => {}}
         onEdit={() => {}}
         onDelete={() => {}}
         onComplete={() => {}}
@@ -70,6 +73,7 @@ describe('TaskItem', () => {
     render(
       <TaskItem
         task={mockTask}
+        onClick={() => {}}
         onEdit={onEdit}
         onDelete={() => {}}
         onComplete={() => {}}
@@ -87,6 +91,7 @@ describe('TaskItem', () => {
     render(
       <TaskItem
         task={mockTask}
+        onClick={() => {}}
         onEdit={() => {}}
         onDelete={onDelete}
         onComplete={() => {}}
@@ -104,6 +109,7 @@ describe('TaskItem', () => {
     render(
       <TaskItem
         task={mockTask}
+        onClick={() => {}}
         onEdit={() => {}}
         onDelete={() => {}}
         onComplete={onComplete}
@@ -123,6 +129,7 @@ describe('TaskItem', () => {
     render(
       <TaskItem
         task={longDescTask}
+        onClick={() => {}}
         onEdit={() => {}}
         onDelete={() => {}}
         onComplete={() => {}}

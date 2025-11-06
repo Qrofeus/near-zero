@@ -4,6 +4,7 @@
  */
 
 import { useState, useRef, useEffect } from 'react';
+import { COLORS } from '../constants/colors';
 
 /**
  * Get default deadline (next day 6 PM local time)
@@ -184,11 +185,11 @@ function TaskForm({ onSubmit }) {
 // Basic inline styles for the form
 const styles = {
   form: {
-    backgroundColor: '#f9f9f9',
+    backgroundColor: COLORS.bgOffWhite,
     padding: '20px',
     borderRadius: '8px',
     marginBottom: '20px',
-    border: '1px solid #ddd'
+    border: `1px solid ${COLORS.borderLight}`
   },
   field: {
     marginBottom: '15px',
@@ -199,19 +200,19 @@ const styles = {
     marginBottom: '5px',
     fontWeight: 'bold',
     fontSize: '14px',
-    color: '#333'
+    color: COLORS.textDark
   },
   input: {
     padding: '8px 12px',
     fontSize: '14px',
-    border: '1px solid #ccc',
+    border: `1px solid ${COLORS.borderMedium}`,
     borderRadius: '4px',
     outline: 'none'
   },
   textarea: {
     padding: '8px 12px',
     fontSize: '14px',
-    border: '1px solid #ccc',
+    border: `1px solid ${COLORS.borderMedium}`,
     borderRadius: '4px',
     outline: 'none',
     fontFamily: 'inherit',
@@ -220,10 +221,10 @@ const styles = {
   select: {
     padding: '8px 12px',
     fontSize: '14px',
-    border: '1px solid #ccc',
+    border: `1px solid ${COLORS.borderMedium}`,
     borderRadius: '4px',
     outline: 'none',
-    backgroundColor: 'white'
+    backgroundColor: COLORS.bgWhite
   },
   dateTimeRow: {
     display: 'flex',
@@ -233,8 +234,8 @@ const styles = {
     padding: '10px 20px',
     fontSize: '16px',
     fontWeight: 'bold',
-    color: 'white',
-    backgroundColor: '#007bff',
+    color: COLORS.bgWhite,
+    backgroundColor: COLORS.primary,
     border: '2px solid transparent',
     borderRadius: '4px',
     cursor: 'pointer',

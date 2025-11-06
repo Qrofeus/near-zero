@@ -4,6 +4,7 @@
  */
 
 import { SORT_MODES } from '../utils/sorting';
+import { COLORS } from '../constants/colors';
 
 function SortToggle({ currentMode, onModeChange }) {
   return (
@@ -45,12 +46,12 @@ const styles = {
   label: {
     fontSize: '14px',
     fontWeight: '600',
-    color: '#333',
+    color: COLORS.textDark,
   },
   toggleGroup: {
     display: 'flex',
     gap: '0',
-    border: '2px solid #007bff',
+    border: `2px solid ${COLORS.primary}`,
     borderRadius: '6px',
     overflow: 'hidden',
   },
@@ -58,17 +59,17 @@ const styles = {
     padding: '6px 16px',
     fontSize: '14px',
     fontWeight: '500',
-    color: '#007bff',
-    backgroundColor: 'white',
+    color: COLORS.primary,
+    backgroundColor: COLORS.bgWhite,
     border: 'none',
     cursor: 'pointer',
     transition: 'all 0.2s',
-    borderRight: '1px solid #007bff',
+    borderRight: `1px solid ${COLORS.primary}`,
     outline: 'none'
   },
   buttonActive: {
-    backgroundColor: '#007bff',
-    color: 'white',
+    backgroundColor: COLORS.primary,
+    color: COLORS.bgWhite,
     fontWeight: '600',
   },
 };

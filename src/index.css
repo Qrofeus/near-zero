@@ -1,5 +1,12 @@
 /* Global styles for NearZero application */
 
+/* CSS Reset: Apply box-sizing and reset margins/padding */
+*, *::before, *::after {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
 /* Focus indicators for accessibility */
 
 /* Buttons: Scale up with inset white outline (button color shows as gap) */
@@ -59,4 +66,26 @@ select:focus {
 .modal-content::-webkit-scrollbar-thumb {
   background: #cbd5e0;
   border-radius: 3px;
+}
+
+/* Pulse animation for urgent tasks (<1hr remaining) */
+@keyframes pulse {
+  0%, 100% {
+    transform: scale(1);
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+  }
+  50% {
+    transform: scale(1.02);
+    box-shadow: 0 4px 8px rgba(239, 68, 68, 0.3);
+  }
+}
+
+.pulse-animation {
+  animation: pulse 2s ease-in-out infinite;
+}
+
+/* Greyed out style for overdue tasks */
+.task-overdue {
+  opacity: 0.6;
+  filter: grayscale(20%);
 }

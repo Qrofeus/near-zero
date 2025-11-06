@@ -6,6 +6,7 @@
 
 import { useEffect, useRef } from 'react';
 import Modal from './Modal';
+import { COLORS } from '../constants/colors';
 
 /**
  * AlertDialog - Simple alert modal
@@ -84,15 +85,15 @@ const styles = {
     padding: '24px'
   },
   title: {
-    margin: '0 0 16px 0',
+    marginBottom: '16px',
     fontSize: '20px',
     fontWeight: 'bold',
-    color: '#333'
+    color: COLORS.textDark
   },
   message: {
-    margin: '0 0 24px 0',
+    marginBottom: '24px',
     fontSize: '15px',
-    color: '#555',
+    color: COLORS.textMedium,
     lineHeight: '1.5'
   },
   actions: {
@@ -111,16 +112,16 @@ const styles = {
     outline: 'none'
   },
   primaryButton: {
-    backgroundColor: '#007bff',
-    color: 'white'
+    backgroundColor: COLORS.primary,
+    color: COLORS.bgWhite
   },
   warningButton: {
-    backgroundColor: '#ffc107',
-    color: '#333'
+    backgroundColor: COLORS.warning,
+    color: COLORS.textDark
   },
   dangerButton: {
-    backgroundColor: '#dc3545',
-    color: 'white'
+    backgroundColor: COLORS.danger,
+    color: COLORS.bgWhite
   }
 };
 

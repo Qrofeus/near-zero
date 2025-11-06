@@ -6,7 +6,7 @@ NearZero is a browser-based task management web application built with React. It
 
 This is a **privacy-first** application. All data is stored *only* in your browser's Local Storage. There are no accounts, no logins, and no data is ever sent to a server.
 
-## ✨ Key Features (Version 1.0)
+## Key Features (Version 1.0)
 
 Based on the V1 design goals, this application will include:
 
@@ -18,7 +18,7 @@ Based on the V1 design goals, this application will include:
 * **Responsive Design:** A clean, multi-column layout that adapts to both desktop and mobile screens.
 * **Modal View:** Click any task to open a modal showing its full details and providing quick actions like "Edit" or "Delete".
 
-## 🛠️ Core Technology
+## ️ Core Technology
 
 * **Frontend:** [React](https://react.dev/) (bootstrapped with [Vite](https://vitejs.dev/))
 * **Storage:** Browser `window.localStorage`
@@ -27,7 +27,7 @@ Based on the V1 design goals, this application will include:
     * **Unique IDs:** `uuid` for generating unique task IDs.
     * **Animations:** `framer-motion` (optional) for smooth transitions.
 
-## 🚀 Getting Started
+## Getting Started
 
 This project was bootstrapped with Vite. To get it running locally:
 
@@ -39,9 +39,8 @@ This project was bootstrapped with Vite. To get it running locally:
 ### Installation & Running
 
 1.  **Clone the repository:**
-    *(Note: You will need to create a GitHub repository for this first. Replace `[YOUR_USERNAME]` with your actual username.)*
     ```sh
-    git clone https://github.com/[YOUR_USERNAME]/near-zero.git
+    git clone https://github.com/Qrofeus/near-zero.git
     ```
 2.  **Navigate to the project directory:**
     ```sh
@@ -57,6 +56,6 @@ This project was bootstrapped with Vite. To get it running locally:
     ```
 5.  Open your browser and visit `http://localhost:5173` (or the port shown in your terminal).
 
-## 📄 License
+## License
 
 This project is open-source and available under the MIT License.

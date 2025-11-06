@@ -7,10 +7,11 @@ import { useState, useEffect } from 'react';
 import TaskForm from './components/TaskForm';
 import TaskList from './components/TaskList';
 import SortToggle from './components/SortToggle';
+import DensityControl from './components/DensityControl';
+import TaskDetailModal from './components/TaskDetailModal';
 import Modal from './components/Modal';
 import AlertDialog from './components/AlertDialog';
 import ConfirmDialog from './components/ConfirmDialog';
-import MessageBar from './components/MessageBar';
 import { localToUTC, isInPast } from './utils/datetime';
 import { getAllTasks } from './utils/tasks';
 import {
@@ -20,6 +21,9 @@ import {
 import { sortTasks } from './utils/sorting';
 import { getSortMode, setSortMode } from './utils/preferences';
 import { needsUrgentRefresh } from './utils/urgency';
+import { getDensity, setDensity } from './utils/density';
+import { useViewportWidth } from './hooks/useViewportWidth';
+import { getAvailableDensities, shouldDemoteDensity, getDemotedDensity } from './utils/responsiveDensity';
 
 function App() {
   /**
@@ -42,6 +46,27 @@ function App() {
    * Loaded from localStorage on mount
    */
   const [sortMode, setSortModeState] = useState(() => getSortMode());
+
+  /**
+   * density: Current density mode (compact/comfortable/spacious)
+   * Loaded from localStorage on mount
+   */
+  const [density, setDensityState] = useState(() => getDensity());
+
+  /**
+   * Track viewport width for responsive density
+   */
+  const viewportWidth = useViewportWidth();
+
+  /**
+   * Calculate available densities based on viewport width
+   */
+  const availableDensities = getAvailableDensities(viewportWidth);
+
+  /**
+   * selectedTask: Task currently shown in detail modal
+   */
+  const [selectedTask, setSelectedTask] = useState(null);
 
   /**
    * Modal state management
@@ -90,6 +115,18 @@ function App() {
     const loadedTasks = getAllTasks();
     setTasks(loadedTasks);
   }, []); // Empty dependency array = run once on mount
+
+  /**
+   * useEffect: Auto-demote density when viewport becomes too narrow
+   * Ensures selected density is always available for current viewport
+   */
+  useEffect(() => {
+    if (shouldDemoteDensity(density, availableDensities)) {
+      const demoted = getDemotedDensity(density, availableDensities);
+      setDensity(demoted);
+      setDensityState(demoted);
+    }
+  }, [availableDensities, density]); // Re-run when viewport or density changes
 
   /**
    * useEffect: Add keyboard shortcuts
@@ -183,12 +220,31 @@ function App() {
   };
 
   /**
-   * Handle editing a task
-   * For Phase 2, just show which task would be edited
-   * Full edit functionality will come in later phases
+   * Handle clicking on a task to view details
    */
-  const handleEditTask = (taskId) => {
-    showAlert('Coming Soon', `Edit functionality for task ${taskId} will be implemented in later phases`);
+  const handleTaskClick = (taskId) => {
+    const task = tasks.find(t => t.id === taskId);
+    if (task) {
+      setSelectedTask(task);
+    }
+  };
+
+  /**
+   * Handle editing a task
+   * For Phase 5, show placeholder - full edit UI will come in Phase 6
+   */
+  const handleEditTask = (_taskId) => {
+    setSelectedTask(null); // Close detail modal
+    showAlert('Coming Soon', 'Full task editing will be implemented in Phase 6');
+  };
+
+  /**
+   * Handle changing task deadline
+   * For Phase 5, show placeholder - full functionality will come in Phase 6
+   */
+  const handleChangeDeadline = (_taskId) => {
+    setSelectedTask(null); // Close detail modal
+    showAlert('Coming Soon', 'Change deadline functionality will be implemented in Phase 6');
   };
 
   /**
@@ -199,6 +255,11 @@ function App() {
     // Find task to show in confirmation
     const task = tasks.find(t => t.id === taskId);
     if (!task) return;
+
+    // Close detail modal if open
+    if (selectedTask && selectedTask.id === taskId) {
+      setSelectedTask(null);
+    }
 
     // Show confirmation dialog
     showConfirm(
@@ -253,6 +314,15 @@ function App() {
   };
 
   /**
+   * Handle density change
+   * Saves to localStorage and updates state
+   */
+  const handleDensityChange = (newDensity) => {
+    setDensity(newDensity);
+    setDensityState(newDensity);
+  };
+
+  /**
    * Get sorted tasks based on current sort mode
    */
   const sortedTasks = sortTasks(tasks, sortMode);
@@ -274,21 +344,30 @@ function App() {
       </header>
 
       <main style={styles.main}>
-        {/* Sort mode toggle */}
+        {/* Controls: Sort and Density */}
         {tasks.length > 0 && (
-          <SortToggle
-            currentMode={sortMode}
-            onModeChange={handleSortModeChange}
-          />
+          <div style={styles.controls}>
+            <SortToggle
+              currentMode={sortMode}
+              onModeChange={handleSortModeChange}
+            />
+            <DensityControl
+              currentDensity={density}
+              onDensityChange={handleDensityChange}
+              availableDensities={availableDensities}
+            />
+          </div>
         )}
 
         {/* Task list */}
         <TaskList
           tasks={sortedTasks}
+          onClick={handleTaskClick}
           onEdit={handleEditTask}
           onDelete={handleDeleteTask}
           onComplete={handleCompleteTask}
           onAddTask={() => setShowForm(true)}
+          density={density}
         />
       </main>
 
@@ -328,6 +407,16 @@ function App() {
           <TaskForm onSubmit={handleAddTask} />
         </div>
       </Modal>
+
+      {/* Task Detail Modal */}
+      <TaskDetailModal
+        isOpen={!!selectedTask}
+        task={selectedTask}
+        onClose={() => setSelectedTask(null)}
+        onEdit={handleEditTask}
+        onChangeDeadline={handleChangeDeadline}
+        onDelete={handleDeleteTask}
+      />
     </div>
   );
 }
@@ -353,7 +442,6 @@ const styles = {
     flexWrap: 'wrap'
   },
   title: {
-    margin: 0,
     fontSize: '32px',
     fontWeight: 'bold'
   },
@@ -370,16 +458,22 @@ const styles = {
     outline: 'none'
   },
   subtitle: {
-    margin: '5px 0 0 0',
+    marginTop: '5px',
     fontSize: '14px',
     opacity: 0.9
   },
   main: {
     flex: 1,
-    maxWidth: '800px',
+    maxWidth: '1200px',
     width: '100%',
     margin: '0 auto',
     padding: '20px'
+  },
+  controls: {
+    display: 'flex',
+    gap: '10px',
+    flexWrap: 'wrap',
+    marginBottom: '15px'
   },
   formContainer: {
     padding: '24px'
@@ -391,7 +485,6 @@ const styles = {
     marginBottom: '15px'
   },
   formTitle: {
-    margin: 0,
     fontSize: '20px',
     color: '#333'
   },

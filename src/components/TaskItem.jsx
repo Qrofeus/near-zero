@@ -5,17 +5,19 @@
  */
 
 import { formatAbsoluteTime } from '../utils/datetime';
-import { getUrgencyColor, formatRelativeTime } from '../utils/urgency';
+import { getUrgencyColor, formatRelativeTime, getTimeRemaining, isOverdue } from '../utils/urgency';
+import { COLORS } from '../constants/colors';
 
 /**
  * TaskItem - Displays a single task
  * @param {object} task - Task object with all properties
+ * @param {function} onClick - Callback when task card clicked (receives task.id)
  * @param {function} onEdit - Callback when edit button clicked (receives task.id)
  * @param {function} onDelete - Callback when delete button clicked (receives task.id)
  * @param {function} onComplete - Callback when complete button clicked (receives task.id)
  * @returns {JSX.Element}
  */
-function TaskItem({ task, onEdit, onDelete, onComplete }) {
+function TaskItem({ task, onClick, onEdit, onDelete, onComplete }) {
   /**
    * Get priority label from priority number
    * @param {number} priority - 1=High, 2=Medium, 3=Low
@@ -42,24 +44,41 @@ function TaskItem({ task, onEdit, onDelete, onComplete }) {
   const getPriorityColor = (priority) => {
     switch (priority) {
       case 1:
-        return '#dc3545'; // Red
+        return COLORS.priorityHigh;
       case 2:
-        return '#ffc107'; // Yellow
+        return COLORS.priorityMedium;
       case 3:
-        return '#28a745'; // Green
+        return COLORS.priorityLow;
       default:
-        return '#6c757d'; // Gray
+        return COLORS.priorityDefault;
     }
   };
 
   const urgencyColor = getUrgencyColor(task.deadline);
   const relativeTime = formatRelativeTime(task.deadline);
 
+  // Check if task needs pulse animation (<1hr remaining)
+  const timeRemaining = getTimeRemaining(task.deadline);
+  const hoursRemaining = timeRemaining / (60 * 60 * 1000);
+  const needsPulse = hoursRemaining < 1 && hoursRemaining > 0;
+
+  // Check if task is overdue
+  const taskOverdue = isOverdue(task.deadline);
+
+  // Build className for animations
+  let className = '';
+  if (needsPulse) className += 'pulse-animation ';
+  if (taskOverdue) className += 'task-overdue ';
+
   return (
-    <div style={{
-      ...styles.card,
-      borderLeft: `4px solid ${urgencyColor}`
-    }}>
+    <div
+      style={{
+        ...styles.card,
+        borderLeft: `4px solid ${urgencyColor}`
+      }}
+      className={className.trim()}
+      onClick={() => onClick && onClick(task.id)}
+    >
       {/* Header: Title and Priority */}
       <div style={styles.header}>
         <h3 style={styles.title}>{task.title}</h3>
@@ -116,12 +135,15 @@ function TaskItem({ task, onEdit, onDelete, onComplete }) {
 // Component styles
 const styles = {
   card: {
-    backgroundColor: 'white',
-    border: '1px solid #ddd',
+    backgroundColor: COLORS.bgWhite,
+    border: `1px solid ${COLORS.borderLight}`,
     borderRadius: '8px',
     padding: '15px',
-    marginBottom: '15px',
-    boxShadow: '0 2px 4px rgba(0,0,0,0.1)'
+    boxShadow: '0 2px 4px rgba(0,0,0,0.1)',
+    cursor: 'pointer',
+    transition: 'transform 0.1s ease',
+    width: '100%', // Fill grid track
+    alignSelf: 'start'
   },
   header: {
     display: 'flex',
@@ -130,16 +152,15 @@ const styles = {
     marginBottom: '10px'
   },
   title: {
-    margin: 0,
     fontSize: '18px',
     fontWeight: 'bold',
-    color: '#333',
+    color: COLORS.textDark,
     flex: 1
   },
   priorityBadge: {
     padding: '4px 8px',
     borderRadius: '4px',
-    color: 'white',
+    color: COLORS.bgWhite,
     fontSize: '12px',
     fontWeight: 'bold',
     marginLeft: '10px'
@@ -147,7 +168,7 @@ const styles = {
   description: {
     margin: '10px 0',
     fontSize: '14px',
-    color: '#666',
+    color: COLORS.textLight,
     // Truncate to 1 line with ellipsis
     overflow: 'hidden',
     textOverflow: 'ellipsis',
@@ -163,7 +184,7 @@ const styles = {
   },
   absoluteTime: {
     fontSize: '12px',
-    color: '#777'
+    color: COLORS.textLighter
   },
   actions: {
     display: 'flex',
@@ -180,16 +201,16 @@ const styles = {
     outline: 'none'
   },
   completeButton: {
-    backgroundColor: '#28a745',
-    color: 'white'
+    backgroundColor: COLORS.success,
+    color: COLORS.bgWhite
   },
   editButton: {
-    backgroundColor: '#007bff',
-    color: 'white'
+    backgroundColor: COLORS.primary,
+    color: COLORS.bgWhite
   },
   deleteButton: {
-    backgroundColor: '#dc3545',
-    color: 'white'
+    backgroundColor: COLORS.danger,
+    color: COLORS.bgWhite
   }
 };
 

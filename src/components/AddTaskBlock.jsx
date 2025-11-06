@@ -4,6 +4,8 @@
  * Displayed at the end of task list
  */
 
+import { COLORS } from '../constants/colors';
+
 /**
  * AddTaskBlock - Clickable block to open task form
  * @param {function} onAddTask - Callback to open task creation form
@@ -25,31 +27,31 @@ function AddTaskBlock({ onAddTask }) {
 const styles = {
   block: {
     // Make it look like a task card but with dashed border
-    backgroundColor: 'transparent',
-    border: '2px dashed #007bff',
+    backgroundColor: COLORS.bgTransparent,
+    border: `2px dashed ${COLORS.primary}`,
     borderRadius: '8px',
-    padding: '30px',
-    marginBottom: '15px',
+    padding: '15px',
     cursor: 'pointer',
     display: 'flex',
     flexDirection: 'column',
     alignItems: 'center',
     justifyContent: 'center',
-    gap: '10px',
+    gap: '8px',
     transition: 'all 0.2s',
     // Remove default button styles
     outline: 'none',
-    width: '100%'
+    width: '100%', // Fill grid track
+    transform: 'scale(1)',
   },
   icon: {
-    fontSize: '48px',
-    color: '#007bff',
+    fontSize: '36px',
+    color: COLORS.primary,
     fontWeight: 'bold',
     lineHeight: 1
   },
   text: {
-    fontSize: '18px',
-    color: '#007bff',
+    fontSize: '16px',
+    color: COLORS.primary,
     fontWeight: 'bold'
   }
 };

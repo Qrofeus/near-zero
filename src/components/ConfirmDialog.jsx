@@ -6,6 +6,7 @@
 
 import { useEffect, useRef } from 'react';
 import Modal from './Modal';
+import { COLORS } from '../constants/colors';
 
 /**
  * ConfirmDialog - Confirmation modal dialog
@@ -43,7 +44,8 @@ function ConfirmDialog({
     const handleKeyDown = (e) => {
       if (e.key === 'Enter') {
         e.preventDefault();
-        handleConfirm();
+        onConfirm();
+        onClose();
       }
     };
 
@@ -91,15 +93,15 @@ const styles = {
     padding: '24px'
   },
   title: {
-    margin: '0 0 16px 0',
+    marginBottom: '16px',
     fontSize: '20px',
     fontWeight: 'bold',
-    color: '#333'
+    color: COLORS.textDark
   },
   message: {
-    margin: '0 0 24px 0',
+    marginBottom: '24px',
     fontSize: '15px',
-    color: '#555',
+    color: COLORS.textMedium,
     lineHeight: '1.5'
   },
   actions: {
@@ -118,16 +120,16 @@ const styles = {
     outline: 'none'
   },
   cancelButton: {
-    backgroundColor: '#e5e7eb',
-    color: '#374151'
+    backgroundColor: COLORS.bgGray,
+    color: COLORS.textGray
   },
   confirmButton: {
-    backgroundColor: '#007bff',
-    color: 'white'
+    backgroundColor: COLORS.primary,
+    color: COLORS.bgWhite
   },
   dangerButton: {
-    backgroundColor: '#dc3545',
-    color: 'white'
+    backgroundColor: COLORS.danger,
+    color: COLORS.bgWhite
   }
 };
 
