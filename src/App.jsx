@@ -12,11 +12,15 @@ import TaskDetailModal from './components/TaskDetailModal';
 import Modal from './components/Modal';
 import AlertDialog from './components/AlertDialog';
 import ConfirmDialog from './components/ConfirmDialog';
+import Settings from './components/Settings';
+import Toast from './components/Toast';
+import Banner from './components/Banner';
 import { localToUTC, isInPast } from './utils/datetime';
 import { getAllTasks } from './utils/tasks';
 import {
   createTask,
-  deleteTask as removeTask
+  deleteTask as removeTask,
+  clearAllTasks
 } from './utils/taskStorage';
 import { sortTasks } from './utils/sorting';
 import { getSortMode, setSortMode } from './utils/preferences';
@@ -24,6 +28,9 @@ import { needsUrgentRefresh } from './utils/urgency';
 import { getDensity, setDensity } from './utils/density';
 import { useViewportWidth } from './hooks/useViewportWidth';
 import { getAvailableDensities, shouldDemoteDensity, getDemotedDensity } from './utils/responsiveDensity';
+import { isLocalStorageAvailable, getDemoMode, setDemoMode, generateExampleTasks } from './utils/demoMode';
+import { needsVersionUpdate, performVersionUpdate } from './utils/version';
+import { saveToStorage, STORAGE_KEYS } from './utils/storage';
 
 function App() {
   /**
@@ -87,6 +94,28 @@ function App() {
   });
 
   /**
+   * Settings modal state
+   */
+  const [showSettings, setShowSettings] = useState(false);
+
+  /**
+   * Toast notification state
+   */
+  const [toast, setToast] = useState({
+    isVisible: false,
+    message: '',
+    variant: 'info',
+    duration: 3000
+  });
+
+  /**
+   * Demo mode and storage availability state
+   */
+  const [demoMode, setDemoModeState] = useState(() => getDemoMode());
+  const [storageAvailable, setStorageAvailable] = useState(true);
+  const [inMemoryTasks, setInMemoryTasks] = useState([]);
+
+  /**
    * Helper functions for showing modals
    */
   const showAlert = (title, message, variant = 'primary') => {
@@ -106,14 +135,56 @@ function App() {
   };
 
   /**
+   * Helper function for showing toast
+   */
+  const showToast = (message, variant = 'info', duration = 3000) => {
+    setToast({ isVisible: true, message, variant, duration });
+  };
+
+  const closeToast = () => {
+    setToast({ ...toast, isVisible: false });
+  };
+
+  /**
    * useEffect: Runs side effects in function components
    * The empty array [] means this runs only once when component mounts
    * Similar to componentDidMount in class components
    */
   useEffect(() => {
-    // Load tasks from localStorage when app starts
-    const loadedTasks = getAllTasks();
-    setTasks(loadedTasks);
+    // Check localStorage availability
+    const hasStorage = isLocalStorageAvailable();
+    setStorageAvailable(hasStorage);
+
+    // Check version and perform update if needed
+    if (needsVersionUpdate()) {
+      showToast('Updating to the latest version...', 'info');
+      performVersionUpdate();
+      // Auto-reload after 1.5s
+      setTimeout(() => {
+        window.location.reload();
+      }, 1500);
+      return;
+    }
+
+    // Check demo mode
+    const isDemo = getDemoMode();
+    setDemoModeState(isDemo);
+
+    // Load tasks based on mode
+    if (isDemo) {
+      const exampleTasks = generateExampleTasks();
+      setInMemoryTasks(exampleTasks);
+      setTasks(exampleTasks);
+      showToast('Demo mode active - example tasks loaded', 'info');
+    } else if (!hasStorage) {
+      // localStorage unavailable - start with empty list
+      setInMemoryTasks([]);
+      setTasks([]);
+    } else {
+      // Normal mode - load from localStorage
+      const loadedTasks = getAllTasks();
+      setTasks(loadedTasks);
+    }
   }, []); // Empty dependency array = run once on mount
 
   /**
@@ -199,7 +270,28 @@ function App() {
       return;
     }
 
-    // Create and save task to localStorage
+    // In demo mode or storage unavailable: update in-memory only
+    if (demoMode || !storageAvailable) {
+      const result = createTask({
+        title: formData.title,
+        description: formData.description,
+        deadline: deadlineUTC,
+        priority: formData.priority
+      });
+
+      if (!result.success) {
+        showAlert('Error', `Failed to create task: ${result.errors.join(', ')}`, 'danger');
+        return;
+      }
+
+      const updatedTasks = [...inMemoryTasks, result.task];
+      setInMemoryTasks(updatedTasks);
+      setTasks(updatedTasks);
+      setShowForm(false);
+      return;
+    }
+
+    // Normal mode: create and save to localStorage
     const result = createTask({
       title: formData.title,
       description: formData.description,
@@ -266,7 +358,15 @@ function App() {
       'Delete Task',
       `Are you sure you want to delete "${task.title}"? This action cannot be undone.`,
       () => {
-        // Delete from localStorage and update state
+        // In demo mode or storage unavailable: update in-memory only
+        if (demoMode || !storageAvailable) {
+          const updatedTasks = inMemoryTasks.filter(t => t.id !== taskId);
+          setInMemoryTasks(updatedTasks);
+          setTasks(updatedTasks);
+          return;
+        }
+
+        // Normal mode: delete from localStorage
         const result = removeTask(taskId);
         if (result.success) {
           setTasks(getAllTasks());
@@ -292,7 +392,15 @@ function App() {
       'Complete Task',
       `Mark "${task.title}" as complete?`,
       () => {
-        // Mark complete (sets isCompleted=true then removes)
+        // In demo mode or storage unavailable: update in-memory only
+        if (demoMode || !storageAvailable) {
+          const updatedTasks = inMemoryTasks.filter(t => t.id !== taskId);
+          setInMemoryTasks(updatedTasks);
+          setTasks(updatedTasks);
+          return;
+        }
+
+        // Normal mode: mark complete and remove from localStorage
         const result = removeTask(taskId);
         if (result.success) {
           setTasks(getAllTasks());
@@ -302,6 +410,66 @@ function App() {
       },
       'primary'
     );
+  };
+
+  /**
+   * Handle demo mode toggle
+   */
+  const handleDemoModeToggle = (enabled) => {
+    setDemoMode(enabled);
+    setDemoModeState(enabled);
+
+    if (enabled) {
+      // Entering demo mode - load example tasks
+      const exampleTasks = generateExampleTasks();
+      setInMemoryTasks(exampleTasks);
+      setTasks(exampleTasks);
+      showToast('Demo mode enabled - example tasks loaded', 'success');
+    } else {
+      // Exiting demo mode - load from localStorage
+      const loadedTasks = storageAvailable ? getAllTasks() : [];
+      setInMemoryTasks([]);
+      setTasks(loadedTasks);
+      showToast('Demo mode disabled', 'info');
+    }
+
+    setShowSettings(false);
+  };
+
+  /**
+   * Handle import success
+   */
+  const handleImportSuccess = (importedTasks) => {
+    if (demoMode || !storageAvailable) {
+      // In demo mode or storage unavailable: update in-memory only
+      setInMemoryTasks(importedTasks);
+      setTasks(importedTasks);
+      showToast(`Imported ${importedTasks.length} tasks (in-memory only)`, 'success');
+    } else {
+      // Normal mode: save to localStorage
+      const saved = saveToStorage(STORAGE_KEYS.TASKS, importedTasks);
+      if (saved) {
+        setTasks(getAllTasks());
+        showToast(`Imported ${importedTasks.length} tasks successfully`, 'success');
+      } else {
+        showAlert('Error', 'Failed to save imported tasks', 'danger');
+      }
+    }
+    setShowSettings(false);
+  };
+
+  /**
+   * Handle import error
+   */
+  const handleImportError = (error) => {
+    showAlert('Import Failed', error, 'danger');
+  };
+
+  /**
+   * Handle export success
+   */
+  const handleExportSuccess = () => {
+    showToast('Tasks exported successfully', 'success');
   };
 
   /**
@@ -327,18 +495,55 @@ function App() {
    */
   const sortedTasks = sortTasks(tasks, sortMode);
 
+  // Determine banner message and variant
+  const getBannerInfo = () => {
+    if (demoMode) {
+      return {
+        isVisible: true,
+        message: 'Demo mode active - changes not saved. Exit demo mode for persistent tasks',
+        variant: 'info'
+      };
+    }
+    if (!storageAvailable) {
+      return {
+        isVisible: true,
+        message: '⚠️ localStorage unavailable - changes not saved until session close',
+        variant: 'warning'
+      };
+    }
+    return { isVisible: false };
+  };
+
+  const bannerInfo = getBannerInfo();
+
   return (
     <div style={styles.app}>
+      {/* Banner for demo mode or storage unavailable */}
+      <Banner
+        isVisible={bannerInfo.isVisible}
+        message={bannerInfo.message}
+        variant={bannerInfo.variant}
+      />
+
       <header style={styles.header}>
         <div style={styles.headerContent}>
           <h1 style={styles.title}>NearZero</h1>
-          <button
-            onClick={() => setShowForm(true)}
-            style={styles.addButton}
-            aria-label="Add new task (press Q)"
-          >
-            + Add Task (Q)
-          </button>
+          <div style={styles.headerButtons}>
+            <button
+              onClick={() => setShowForm(true)}
+              style={styles.addButton}
+              aria-label="Add new task (press Q)"
+            >
+              + Add Task (Q)
+            </button>
+            <button
+              onClick={() => setShowSettings(true)}
+              style={styles.settingsButton}
+              aria-label="Open settings"
+            >
+              ⚙ Settings
+            </button>
+          </div>
         </div>
         <p style={styles.subtitle}>Privacy-first task manager with deadline tracking</p>
       </header>
@@ -417,6 +622,26 @@ function App() {
         onChangeDeadline={handleChangeDeadline}
         onDelete={handleDeleteTask}
       />
+
+      {/* Settings Modal */}
+      <Settings
+        isOpen={showSettings}
+        onClose={() => setShowSettings(false)}
+        demoMode={demoMode}
+        onDemoModeToggle={handleDemoModeToggle}
+        onImportSuccess={handleImportSuccess}
+        onImportError={handleImportError}
+        onExportSuccess={handleExportSuccess}
+      />
+
+      {/* Toast Notification */}
+      <Toast
+        isVisible={toast.isVisible}
+        message={toast.message}
+        variant={toast.variant}
+        duration={toast.duration}
+        onClose={closeToast}
+      />
     </div>
   );
 }
@@ -445,7 +670,24 @@ const styles = {
     fontSize: '32px',
     fontWeight: 'bold'
   },
+  headerButtons: {
+    display: 'flex',
+    gap: '10px',
+    flexWrap: 'wrap'
+  },
   addButton: {
+    padding: '8px 16px',
+    fontSize: '16px',
+    fontWeight: 'bold',
+    color: '#007bff',
+    backgroundColor: 'white',
+    border: '2px solid white',
+    borderRadius: '6px',
+    cursor: 'pointer',
+    transition: 'all 0.2s',
+    outline: 'none'
+  },
+  settingsButton: {
     padding: '8px 16px',
     fontSize: '16px',
     fontWeight: 'bold',

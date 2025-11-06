@@ -89,3 +89,15 @@ select:focus {
   opacity: 0.6;
   filter: grayscale(20%);
 }
+
+/* Slide in animation for toast notifications */
+@keyframes slideIn {
+  from {
+    transform: translateX(100%);
+    opacity: 0;
+  }
+  to {
+    transform: translateX(0);
+    opacity: 1;
+  }
+}

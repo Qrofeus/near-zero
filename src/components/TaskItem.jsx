@@ -155,7 +155,12 @@ const styles = {
     fontSize: '18px',
     fontWeight: 'bold',
     color: COLORS.textDark,
-    flex: 1
+    flex: 1,
+    minWidth: 0, // Allow flex item to shrink below content width
+    // Truncate to 1 line with ellipsis
+    overflow: 'hidden',
+    textOverflow: 'ellipsis',
+    whiteSpace: 'nowrap'
   },
   priorityBadge: {
     padding: '4px 8px',
