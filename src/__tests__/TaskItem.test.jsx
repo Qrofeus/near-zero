@@ -20,19 +20,17 @@ describe('TaskItem', () => {
     schemaVersion: 1
   };
 
-  it('renders task title and description', () => {
+  it('renders task title', () => {
     render(
       <TaskItem
         task={mockTask}
         onClick={() => {}}
-        onEdit={() => {}}
         onDelete={() => {}}
         onComplete={() => {}}
       />
     );
 
     expect(screen.getByText('Test Task')).toBeInTheDocument();
-    expect(screen.getByText('Test description')).toBeInTheDocument();
   });
 
   it('displays deadline with relative and absolute time', () => {
@@ -40,7 +38,6 @@ describe('TaskItem', () => {
       <TaskItem
         task={mockTask}
         onClick={() => {}}
-        onEdit={() => {}}
         onDelete={() => {}}
         onComplete={() => {}}
       />
@@ -57,7 +54,6 @@ describe('TaskItem', () => {
       <TaskItem
         task={mockTask}
         onClick={() => {}}
-        onEdit={() => {}}
         onDelete={() => {}}
         onComplete={() => {}}
       />
@@ -66,25 +62,7 @@ describe('TaskItem', () => {
     expect(screen.getByText(/high/i)).toBeInTheDocument();
   });
 
-  it('calls onEdit when edit button is clicked', async () => {
-    const user = userEvent.setup();
-    const onEdit = vi.fn();
-
-    render(
-      <TaskItem
-        task={mockTask}
-        onClick={() => {}}
-        onEdit={onEdit}
-        onDelete={() => {}}
-        onComplete={() => {}}
-      />
-    );
-
-    await user.click(screen.getByRole('button', { name: /edit/i }));
-    expect(onEdit).toHaveBeenCalledWith(mockTask.id);
-  });
-
-  it('calls onDelete when delete button is clicked', async () => {
+  it('calls onDelete when delete icon is clicked', async () => {
     const user = userEvent.setup();
     const onDelete = vi.fn();
 
@@ -92,13 +70,12 @@ describe('TaskItem', () => {
       <TaskItem
         task={mockTask}
         onClick={() => {}}
-        onEdit={() => {}}
         onDelete={onDelete}
         onComplete={() => {}}
       />
     );
 
-    await user.click(screen.getByRole('button', { name: /delete/i }));
+    await user.click(screen.getByLabelText('Delete task'));
     expect(onDelete).toHaveBeenCalledWith(mockTask.id);
   });
 
@@ -110,7 +87,6 @@ describe('TaskItem', () => {
       <TaskItem
         task={mockTask}
         onClick={() => {}}
-        onEdit={() => {}}
         onDelete={() => {}}
         onComplete={onComplete}
       />
@@ -120,24 +96,23 @@ describe('TaskItem', () => {
     expect(onComplete).toHaveBeenCalledWith(mockTask.id);
   });
 
-  it('truncates long descriptions with ellipsis', () => {
-    const longDescTask = {
+  it('truncates long titles with ellipsis', () => {
+    const longTitleTask = {
       ...mockTask,
-      description: 'A'.repeat(200)
+      title: 'A'.repeat(200)
     };
 
     render(
       <TaskItem
-        task={longDescTask}
+        task={longTitleTask}
         onClick={() => {}}
-        onEdit={() => {}}
         onDelete={() => {}}
         onComplete={() => {}}
       />
     );
 
-    const description = screen.getByText(/A+/);
-    expect(description.style.overflow).toBe('hidden');
-    expect(description.style.textOverflow).toBe('ellipsis');
+    const title = screen.getByText(/A+/);
+    expect(title.style.overflow).toBe('hidden');
+    expect(title.style.textOverflow).toBe('ellipsis');
   });
 });

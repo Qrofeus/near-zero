@@ -5,7 +5,6 @@
  */
 
 import { DENSITY_MODES } from '../utils/density';
-import { COLORS } from '../constants/colors';
 
 /**
  * DensityControl - Toggle for task list density
@@ -40,13 +39,14 @@ function DensityControl({ currentDensity, onDensityChange, availableDensities = 
       <div style={styles.buttonGroup}>
         {densityButtons
           .filter(btn => availableDensities.includes(btn.mode))
-          .map(btn => (
+          .map((btn, index, array) => (
             <button
               key={btn.mode}
               onClick={() => onDensityChange(btn.mode)}
               style={{
                 ...styles.button,
-                ...(currentDensity === btn.mode ? styles.activeButton : {})
+                ...(currentDensity === btn.mode ? styles.activeButton : {}),
+                ...(index === array.length - 1 ? { borderRight: 'none' } : {})
               }}
               aria-label={btn.label}
             >
@@ -63,37 +63,36 @@ const styles = {
   container: {
     display: 'flex',
     alignItems: 'center',
-    gap: '10px',
-    marginBottom: '15px',
-    padding: '10px',
-    backgroundColor: COLORS.bgWhite,
-    borderRadius: '6px',
-    boxShadow: '0 1px 3px rgba(0,0,0,0.1)'
+    gap: '10px'
   },
   label: {
     fontSize: '14px',
-    fontWeight: 'bold',
-    color: COLORS.textMedium
+    fontWeight: '600',
+    color: 'var(--text-primary)'
   },
   buttonGroup: {
     display: 'flex',
-    gap: '5px'
+    gap: '0',
+    border: '2px solid var(--accent)',
+    borderRadius: '6px',
+    overflow: 'hidden'
   },
   button: {
-    padding: '6px 12px',
-    fontSize: '16px',
-    backgroundColor: COLORS.bgLightGray,
-    color: COLORS.textMedium,
-    border: '2px solid transparent',
-    borderRadius: '4px',
+    padding: '6px 16px',
+    fontSize: '14px',
+    backgroundColor: 'var(--bg-primary)',
+    color: 'var(--accent)',
+    border: 'none',
+    borderRight: '1px solid var(--accent)',
     cursor: 'pointer',
-    fontWeight: 'bold',
+    fontWeight: '500',
     outline: 'none',
     transition: 'all 0.2s'
   },
   activeButton: {
-    backgroundColor: COLORS.primary,
-    color: COLORS.bgWhite
+    backgroundColor: 'var(--accent)',
+    color: '#fff',
+    fontWeight: '600'
   }
 };
 

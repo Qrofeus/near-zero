@@ -1,10 +1,12 @@
 /**
  * Settings Component
- * Displays settings modal with import/export and demo mode controls
+ * Displays settings modal with import/export, demo mode, theme controls, and help
  */
 
-import { useRef } from 'react';
+import { useRef, useState } from 'react';
 import Modal from './Modal';
+import ThemeControl from './ThemeControl';
+import HelpModal from './HelpModal';
 import { downloadTasksAsJSON, importTasksFromJSON } from '../utils/importExport';
 
 /**
@@ -16,6 +18,8 @@ import { downloadTasksAsJSON, importTasksFromJSON } from '../utils/importExport'
  * @param {function} props.onImportSuccess - Callback when import succeeds (tasks)
  * @param {function} props.onImportError - Callback when import fails (error message)
  * @param {function} props.onExportSuccess - Callback when export succeeds
+ * @param {'light' | 'dark' | 'system'} props.themePreference - Current theme preference
+ * @param {function} props.onThemeChange - Callback when theme is changed
  */
 function Settings({
   isOpen,
@@ -24,9 +28,12 @@ function Settings({
   onDemoModeToggle,
   onImportSuccess,
   onImportError,
-  onExportSuccess
+  onExportSuccess,
+  themePreference,
+  onThemeChange
 }) {
   const fileInputRef = useRef(null);
+  const [showHelp, setShowHelp] = useState(false);
 
   const handleExport = () => {
     try {
@@ -123,6 +130,11 @@ function Settings({
         </div>
 
         <div style={styles.section}>
+          <h3 style={styles.sectionTitle}>Appearance</h3>
+          <ThemeControl currentTheme={themePreference} onThemeChange={onThemeChange} />
+        </div>
+
+        <div style={styles.section}>
           <h3 style={styles.sectionTitle}>Demo Mode</h3>
 
           <div style={styles.toggle}>
@@ -143,7 +155,24 @@ function Settings({
             Demo mode loads example tasks and prevents saving to localStorage. All changes are in-memory only.
           </p>
         </div>
+
+        <div style={styles.section}>
+          <h3 style={styles.sectionTitle}>Help & Documentation</h3>
+          <button
+            onClick={() => setShowHelp(true)}
+            style={styles.helpButton}
+            aria-label="Open help documentation"
+          >
+            📖 How to Use NearZero
+          </button>
+          <p style={styles.hint}>
+            Learn about features, keyboard shortcuts, and privacy
+          </p>
+        </div>
       </div>
+
+      {/* Help Modal */}
+      <HelpModal isOpen={showHelp} onClose={() => setShowHelp(false)} />
     </Modal>
   );
 }
@@ -161,13 +190,13 @@ const styles = {
   title: {
     fontSize: '24px',
     fontWeight: 'bold',
-    color: '#333',
+    color: 'var(--text-primary)',
     margin: 0
   },
   closeButton: {
     padding: '4px 8px',
     fontSize: '24px',
-    color: '#666',
+    color: 'var(--text-secondary)',
     backgroundColor: 'transparent',
     border: '2px solid transparent',
     cursor: 'pointer',
@@ -178,12 +207,12 @@ const styles = {
   section: {
     marginBottom: '24px',
     paddingBottom: '24px',
-    borderBottom: '1px solid #e0e0e0'
+    borderBottom: '1px solid var(--border-primary)'
   },
   sectionTitle: {
     fontSize: '16px',
     fontWeight: 'bold',
-    color: '#555',
+    color: 'var(--text-secondary)',
     marginBottom: '12px'
   },
   buttonGroup: {
@@ -196,20 +225,37 @@ const styles = {
     padding: '10px 16px',
     fontSize: '14px',
     fontWeight: '500',
-    color: 'white',
-    backgroundColor: '#007bff',
+    color: 'var(--text-inverse)',
+    backgroundColor: 'var(--accent)',
     border: '2px solid transparent',
     borderRadius: '6px',
     cursor: 'pointer',
     transition: 'all 0.2s',
     outline: 'none'
   },
+  helpButton: {
+    width: '100%',
+    padding: '12px 16px',
+    fontSize: '15px',
+    fontWeight: '500',
+    color: 'var(--text-primary)',
+    backgroundColor: 'var(--bg-secondary)',
+    border: '2px solid var(--border-primary)',
+    borderRadius: '6px',
+    cursor: 'pointer',
+    transition: 'all 0.2s',
+    outline: 'none',
+    display: 'flex',
+    alignItems: 'center',
+    justifyContent: 'center',
+    gap: '8px'
+  },
   fileInput: {
     display: 'none'
   },
   hint: {
     fontSize: '12px',
-    color: '#666',
+    color: 'var(--text-tertiary)',
     margin: '8px 0 0 0',
     lineHeight: '1.4'
   },
@@ -229,7 +275,7 @@ const styles = {
   },
   toggleText: {
     fontSize: '14px',
-    color: '#333'
+    color: 'var(--text-primary)'
   }
 };
 

@@ -22,7 +22,6 @@ describe('TaskDetailModal', () => {
   const mockHandlers = {
     onClose: vi.fn(),
     onEdit: vi.fn(),
-    onChangeDeadline: vi.fn(),
     onDelete: vi.fn()
   };
 
@@ -77,18 +76,6 @@ describe('TaskDetailModal', () => {
     expect(screen.getByText('Edit Task')).toBeInTheDocument();
   });
 
-  it('shows Change Deadline action button', () => {
-    render(
-      <TaskDetailModal
-        isOpen={true}
-        task={mockTask}
-        {...mockHandlers}
-      />
-    );
-
-    expect(screen.getByText('Change Deadline')).toBeInTheDocument();
-  });
-
   it('shows Delete action button', () => {
     render(
       <TaskDetailModal
@@ -112,19 +99,6 @@ describe('TaskDetailModal', () => {
 
     fireEvent.click(screen.getByText('Edit Task'));
     expect(mockHandlers.onEdit).toHaveBeenCalledWith('test-123');
-  });
-
-  it('calls onChangeDeadline when Change Deadline button clicked', () => {
-    render(
-      <TaskDetailModal
-        isOpen={true}
-        task={mockTask}
-        {...mockHandlers}
-      />
-    );
-
-    fireEvent.click(screen.getByText('Change Deadline'));
-    expect(mockHandlers.onChangeDeadline).toHaveBeenCalledWith('test-123');
   });
 
   it('calls onDelete when Delete button clicked', () => {

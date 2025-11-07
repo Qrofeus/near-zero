@@ -19,8 +19,8 @@ import { localToUTC, isInPast } from './utils/datetime';
 import { getAllTasks } from './utils/tasks';
 import {
   createTask,
-  deleteTask as removeTask,
-  clearAllTasks
+  updateTask,
+  deleteTask as removeTask
 } from './utils/taskStorage';
 import { sortTasks } from './utils/sorting';
 import { getSortMode, setSortMode } from './utils/preferences';
@@ -31,6 +31,7 @@ import { getAvailableDensities, shouldDemoteDensity, getDemotedDensity } from '.
 import { isLocalStorageAvailable, getDemoMode, setDemoMode, generateExampleTasks } from './utils/demoMode';
 import { needsVersionUpdate, performVersionUpdate } from './utils/version';
 import { saveToStorage, STORAGE_KEYS } from './utils/storage';
+import { useTheme } from './hooks/useTheme';
 
 function App() {
   /**
@@ -49,6 +50,11 @@ function App() {
   const [showForm, setShowForm] = useState(false);
 
   /**
+   * editingTask: Task object being edited (null when not editing)
+   */
+  const [editingTask, setEditingTask] = useState(null);
+
+  /**
    * sortMode: Current sorting mode (deadline or priority)
    * Loaded from localStorage on mount
    */
@@ -59,6 +65,11 @@ function App() {
    * Loaded from localStorage on mount
    */
   const [density, setDensityState] = useState(() => getDensity());
+
+  /**
+   * Theme management (light/dark/system)
+   */
+  const { themePreference, setTheme } = useTheme();
 
   /**
    * Track viewport width for responsive density
@@ -97,6 +108,11 @@ function App() {
    * Settings modal state
    */
   const [showSettings, setShowSettings] = useState(false);
+
+  /**
+   * Mobile menu state
+   */
+  const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
 
   /**
    * Toast notification state
@@ -257,6 +273,21 @@ function App() {
   }, [tasks]); // Re-run when tasks change to adjust interval
 
   /**
+   * useEffect: Prevent body scroll when mobile menu is open
+   */
+  useEffect(() => {
+    if (mobileMenuOpen) {
+      document.body.style.overflow = 'hidden';
+    } else {
+      document.body.style.overflow = '';
+    }
+
+    return () => {
+      document.body.style.overflow = '';
+    };
+  }, [mobileMenuOpen]);
+
+  /**
    * Handle form submission for new task
    * @param {object} formData - { title, description, dateString, timeString, priority }
    */
@@ -312,6 +343,60 @@ function App() {
   };
 
   /**
+   * Handle form submission for editing task
+   * @param {object} formData - { taskId, title, description, dateString, timeString, priority }
+   */
+  const handleUpdateTask = (formData) => {
+    // Convert local date/time to UTC
+    const deadlineUTC = localToUTC(formData.dateString, formData.timeString);
+
+    // Validate deadline is not in past
+    if (isInPast(deadlineUTC)) {
+      showAlert('Invalid Deadline', 'Deadline cannot be in the past', 'warning');
+      return;
+    }
+
+    // In demo mode or storage unavailable: update in-memory only
+    if (demoMode || !storageAvailable) {
+      const updatedTasks = inMemoryTasks.map(t =>
+        t.id === formData.taskId
+          ? {
+              ...t,
+              title: formData.title,
+              description: formData.description,
+              deadline: deadlineUTC,
+              priority: formData.priority,
+              lastModified: new Date().toISOString()
+            }
+          : t
+      );
+      setInMemoryTasks(updatedTasks);
+      setTasks(updatedTasks);
+      setEditingTask(null);
+      showToast('Task updated successfully', 'success');
+      return;
+    }
+
+    // Normal mode: update in localStorage
+    const result = updateTask(formData.taskId, {
+      title: formData.title,
+      description: formData.description,
+      deadline: deadlineUTC,
+      priority: formData.priority
+    });
+
+    if (!result.success) {
+      showAlert('Error', `Failed to update task: ${result.errors.join(', ')}`, 'danger');
+      return;
+    }
+
+    // Update state with updated task list
+    setTasks(getAllTasks());
+    setEditingTask(null);
+    showToast('Task updated successfully', 'success');
+  };
+
+  /**
    * Handle clicking on a task to view details
    */
   const handleTaskClick = (taskId) => {
@@ -323,21 +408,15 @@ function App() {
 
   /**
    * Handle editing a task
-   * For Phase 5, show placeholder - full edit UI will come in Phase 6
    */
-  const handleEditTask = (_taskId) => {
-    setSelectedTask(null); // Close detail modal
-    showAlert('Coming Soon', 'Full task editing will be implemented in Phase 6');
+  const handleEditTask = (taskId) => {
+    const task = tasks.find(t => t.id === taskId);
+    if (task) {
+      setSelectedTask(null); // Close detail modal
+      setEditingTask(task); // Open edit modal
+    }
   };
 
-  /**
-   * Handle changing task deadline
-   * For Phase 5, show placeholder - full functionality will come in Phase 6
-   */
-  const handleChangeDeadline = (_taskId) => {
-    setSelectedTask(null); // Close detail modal
-    showAlert('Coming Soon', 'Change deadline functionality will be implemented in Phase 6');
-  };
 
   /**
    * Handle deleting a task
@@ -525,27 +604,79 @@ function App() {
         variant={bannerInfo.variant}
       />
 
-      <header style={styles.header}>
-        <div style={styles.headerContent}>
+      <header style={styles.navbar}>
+        <div style={styles.logo} className="navbar-logo">
           <h1 style={styles.title}>NearZero</h1>
-          <div style={styles.headerButtons}>
-            <button
-              onClick={() => setShowForm(true)}
-              style={styles.addButton}
-              aria-label="Add new task (press Q)"
-            >
-              + Add Task (Q)
-            </button>
-            <button
-              onClick={() => setShowSettings(true)}
-              style={styles.settingsButton}
-              aria-label="Open settings"
-            >
-              ⚙ Settings
-            </button>
-          </div>
+          <p style={styles.subtitle} className="navbar-subtitle">Privacy-first task manager</p>
         </div>
-        <p style={styles.subtitle}>Privacy-first task manager with deadline tracking</p>
+
+        {/* Desktop nav links */}
+        <div style={styles.navLinks} className="nav-desktop">
+          <button
+            onClick={() => setShowForm(true)}
+            style={styles.addButton}
+            className="nav-button"
+            aria-label="Add new task (press Q)"
+          >
+            + Add Task (Q)
+          </button>
+          <button
+            onClick={() => setShowSettings(true)}
+            style={styles.settingsButton}
+            className="nav-button"
+            aria-label="Open settings"
+          >
+            ⚙ Settings
+          </button>
+        </div>
+
+        {/* Mobile hamburger button */}
+        <button
+          onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
+          style={styles.hamburgerButton}
+          className="nav-mobile"
+          aria-label="Toggle menu"
+        >
+          {mobileMenuOpen ? '✕' : '☰'}
+        </button>
+
+        {/* Mobile menu */}
+        <div
+          style={{
+            ...styles.mobileMenu,
+            transform: mobileMenuOpen ? 'translateX(0)' : 'translateX(100%)'
+          }}
+          className="mobile-menu"
+        >
+          <button
+            onClick={() => {
+              setShowForm(true);
+              setMobileMenuOpen(false);
+            }}
+            style={styles.mobileMenuItem}
+            aria-label="Add new task (press Q)"
+          >
+            + Add Task (Q)
+          </button>
+          <button
+            onClick={() => {
+              setShowSettings(true);
+              setMobileMenuOpen(false);
+            }}
+            style={styles.mobileMenuItem}
+            aria-label="Open settings"
+          >
+            ⚙ Settings
+          </button>
+        </div>
+
+        {/* Mobile menu overlay */}
+        {mobileMenuOpen && (
+          <div
+            style={styles.mobileMenuOverlay}
+            onClick={() => setMobileMenuOpen(false)}
+          />
+        )}
       </header>
 
       <main style={styles.main}>
@@ -568,7 +699,6 @@ function App() {
         <TaskList
           tasks={sortedTasks}
           onClick={handleTaskClick}
-          onEdit={handleEditTask}
           onDelete={handleDeleteTask}
           onComplete={handleCompleteTask}
           onAddTask={() => setShowForm(true)}
@@ -596,7 +726,7 @@ function App() {
         confirmText={confirmDialog.variant === 'danger' ? 'Delete' : 'Confirm'}
       />
 
-      {/* Task Form Modal */}
+      {/* Task Form Modal (Create) */}
       <Modal isOpen={showForm} onClose={() => setShowForm(false)} maxWidth="600px">
         <div style={styles.formContainer}>
           <div style={styles.formHeader}>
@@ -613,13 +743,29 @@ function App() {
         </div>
       </Modal>
 
+      {/* Task Form Modal (Edit) */}
+      <Modal isOpen={!!editingTask} onClose={() => setEditingTask(null)} maxWidth="600px">
+        <div style={styles.formContainer}>
+          <div style={styles.formHeader}>
+            <h2 style={styles.formTitle}>Edit Task</h2>
+            <button
+              onClick={() => setEditingTask(null)}
+              style={styles.closeButton}
+              aria-label="Close form"
+            >
+              ✕
+            </button>
+          </div>
+          <TaskForm onSubmit={handleUpdateTask} task={editingTask} />
+        </div>
+      </Modal>
+
       {/* Task Detail Modal */}
       <TaskDetailModal
         isOpen={!!selectedTask}
         task={selectedTask}
         onClose={() => setSelectedTask(null)}
         onEdit={handleEditTask}
-        onChangeDeadline={handleChangeDeadline}
         onDelete={handleDeleteTask}
       />
 
@@ -632,6 +778,8 @@ function App() {
         onImportSuccess={handleImportSuccess}
         onImportError={handleImportError}
         onExportSuccess={handleExportSuccess}
+        themePreference={themePreference}
+        onThemeChange={setTheme}
       />
 
       {/* Toast Notification */}
@@ -649,60 +797,117 @@ function App() {
 const styles = {
   app: {
     minHeight: '100vh',
-    backgroundColor: '#f5f5f5',
+    backgroundColor: 'var(--bg-secondary)',
     display: 'flex',
     flexDirection: 'column'
   },
-  header: {
-    backgroundColor: '#007bff',
-    color: 'white',
-    padding: '20px',
-    textAlign: 'center'
-  },
-  headerContent: {
+  navbar: {
+    position: 'sticky',
+    top: 0,
+    width: '100%',
     display: 'flex',
+    justifyContent: 'space-between',
     alignItems: 'center',
-    justifyContent: 'center',
-    gap: '20px',
-    flexWrap: 'wrap'
+    padding: '0.5em 2em',
+    backgroundColor: 'var(--bg-primary)',
+    borderBottom: '1px solid var(--border-primary)',
+    zIndex: 999,
+    minHeight: '60px'
+  },
+  logo: {
+    display: 'flex',
+    flexDirection: 'column',
+    gap: '2px'
   },
   title: {
-    fontSize: '32px',
-    fontWeight: 'bold'
+    fontSize: '1.8rem',
+    fontWeight: 'bold',
+    color: 'var(--text-primary)',
+    margin: 0
   },
-  headerButtons: {
+  subtitle: {
+    fontSize: '0.75rem',
+    color: 'var(--text-secondary)',
+    margin: 0
+  },
+  navLinks: {
     display: 'flex',
-    gap: '10px',
+    alignItems: 'center',
+    gap: '0.5em',
     flexWrap: 'wrap'
   },
   addButton: {
-    padding: '8px 16px',
-    fontSize: '16px',
+    padding: '0.5em 1em',
+    fontSize: '1rem',
     fontWeight: 'bold',
-    color: '#007bff',
-    backgroundColor: 'white',
-    border: '2px solid white',
-    borderRadius: '6px',
+    color: 'var(--text-primary)',
+    backgroundColor: 'transparent',
+    border: 'none',
+    borderRadius: '5px',
     cursor: 'pointer',
-    transition: 'all 0.2s',
+    transition: 'background-color 0.2s',
     outline: 'none'
   },
   settingsButton: {
-    padding: '8px 16px',
-    fontSize: '16px',
+    padding: '0.5em 1em',
+    fontSize: '1rem',
     fontWeight: 'bold',
-    color: '#007bff',
-    backgroundColor: 'white',
-    border: '2px solid white',
-    borderRadius: '6px',
+    color: 'var(--text-primary)',
+    backgroundColor: 'transparent',
+    border: 'none',
+    borderRadius: '5px',
     cursor: 'pointer',
-    transition: 'all 0.2s',
+    transition: 'background-color 0.2s',
     outline: 'none'
   },
-  subtitle: {
-    marginTop: '5px',
-    fontSize: '14px',
-    opacity: 0.9
+  hamburgerButton: {
+    display: 'none',
+    padding: '0.5em',
+    fontSize: '1.5rem',
+    color: 'var(--text-primary)',
+    backgroundColor: 'transparent',
+    border: 'none',
+    borderRadius: '5px',
+    cursor: 'pointer',
+    transition: 'background-color 0.2s',
+    outline: 'none'
+  },
+  mobileMenu: {
+    position: 'fixed',
+    top: '60px',
+    right: 0,
+    width: '75%',
+    height: 'calc(100vh - 60px)',
+    backgroundColor: 'var(--bg-primary)',
+    boxShadow: '-2px 0 8px var(--shadow-lg)',
+    display: 'flex',
+    flexDirection: 'column',
+    padding: '20px',
+    gap: '10px',
+    transition: 'transform 0.3s ease-in-out',
+    zIndex: 1000
+  },
+  mobileMenuItem: {
+    padding: '1em',
+    fontSize: '1rem',
+    fontWeight: 'bold',
+    color: 'var(--text-primary)',
+    backgroundColor: 'transparent',
+    border: '1px solid var(--border-primary)',
+    borderRadius: '5px',
+    cursor: 'pointer',
+    textAlign: 'left',
+    transition: 'background-color 0.2s',
+    outline: 'none'
+  },
+  mobileMenuOverlay: {
+    position: 'fixed',
+    top: '60px',
+    left: 0,
+    right: 0,
+    bottom: 0,
+    backgroundColor: 'rgba(0, 0, 0, 0.5)',
+    zIndex: 999
   },
   main: {
     flex: 1,
@@ -713,6 +918,8 @@ const styles = {
   },
   controls: {
     display: 'flex',
+    justifyContent: 'space-between',
+    alignItems: 'center',
     gap: '10px',
     flexWrap: 'wrap',
     marginBottom: '15px'
@@ -728,12 +935,12 @@ const styles = {
   },
   formTitle: {
     fontSize: '20px',
-    color: '#333'
+    color: 'var(--text-primary)'
   },
   closeButton: {
     padding: '4px 8px',
     fontSize: '20px',
-    color: '#666',
+    color: 'var(--text-secondary)',
     backgroundColor: 'transparent',
     border: '2px solid transparent',
     cursor: 'pointer',

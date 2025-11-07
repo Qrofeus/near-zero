@@ -6,7 +6,6 @@
 
 import { useEffect, useRef } from 'react';
 import Modal from './Modal';
-import { COLORS } from '../constants/colors';
 
 /**
  * ConfirmDialog - Confirmation modal dialog
@@ -96,12 +95,12 @@ const styles = {
     marginBottom: '16px',
     fontSize: '20px',
     fontWeight: 'bold',
-    color: COLORS.textDark
+    color: 'var(--text-primary)'
   },
   message: {
     marginBottom: '24px',
     fontSize: '15px',
-    color: COLORS.textMedium,
+    color: 'var(--text-secondary)',
     lineHeight: '1.5'
   },
   actions: {
@@ -120,16 +119,16 @@ const styles = {
     outline: 'none'
   },
   cancelButton: {
-    backgroundColor: COLORS.bgGray,
-    color: COLORS.textGray
+    backgroundColor: 'var(--bg-tertiary)',
+    color: 'var(--text-primary)'
   },
   confirmButton: {
-    backgroundColor: COLORS.primary,
-    color: COLORS.bgWhite
+    backgroundColor: 'var(--accent)',
+    color: '#fff'
   },
   dangerButton: {
-    backgroundColor: COLORS.danger,
-    color: COLORS.bgWhite
+    backgroundColor: 'var(--error)',
+    color: '#fff'
   }
 };
 

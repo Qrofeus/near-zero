@@ -116,4 +116,79 @@ describe('TaskForm', () => {
     expect(dateInput.value).toBeTruthy();
     expect(dateInput.value).toMatch(/^\d{4}-\d{2}-\d{2}$/); // YYYY-MM-DD format
   });
+
+  describe('Edit mode', () => {
+    const mockTask = {
+      id: 'task-1',
+      title: 'Existing Task',
+      description: 'Existing description',
+      deadline: '2025-12-25T18:00:00.000Z', // UTC
+      priority: 1
+    };
+
+    it('renders with pre-filled data when task prop is provided', () => {
+      render(<TaskForm onSubmit={() => {}} task={mockTask} />);
+
+      expect(screen.getByLabelText(/title/i)).toHaveValue('Existing Task');
+      expect(screen.getByLabelText(/description/i)).toHaveValue('Existing description');
+      expect(screen.getByLabelText(/priority/i)).toHaveValue('1');
+    });
+
+    it('shows "Update Task" button in edit mode', () => {
+      render(<TaskForm onSubmit={() => {}} task={mockTask} />);
+
+      expect(screen.getByRole('button', { name: /update task/i })).toBeInTheDocument();
+      expect(screen.queryByRole('button', { name: /add task/i })).not.toBeInTheDocument();
+    });
+
+    it('calls onSubmit with taskId in edit mode', async () => {
+      const user = userEvent.setup();
+      const onSubmit = vi.fn();
+
+      render(<TaskForm onSubmit={onSubmit} task={mockTask} />);
+
+      // Modify title
+      const titleInput = screen.getByLabelText(/title/i);
+      await user.clear(titleInput);
+      await user.type(titleInput, 'Updated Task');
+
+      await user.click(screen.getByRole('button', { name: /update task/i }));
+
+      expect(onSubmit).toHaveBeenCalledWith(
+        expect.objectContaining({
+          taskId: 'task-1',
+          title: 'Updated Task',
+          description: 'Existing description',
+          priority: 1
+        })
+      );
+    });
+
+    it('does not clear form after submission in edit mode', async () => {
+      const user = userEvent.setup();
+      const onSubmit = vi.fn();
+
+      render(<TaskForm onSubmit={onSubmit} task={mockTask} />);
+
+      const titleInput = screen.getByLabelText(/title/i);
+      await user.clear(titleInput);
+      await user.type(titleInput, 'Modified Title');
+
+      await user.click(screen.getByRole('button', { name: /update task/i }));
+
+      // Form should retain values in edit mode
+      expect(titleInput).toHaveValue('Modified Title');
+    });
+
+    it('converts UTC deadline to local date/time for editing', () => {
+      render(<TaskForm onSubmit={() => {}} task={mockTask} />);
+
+      const dateInput = screen.getByLabelText(/deadline date/i);
+      const timeInput = screen.getByLabelText(/deadline time/i);
+
+      // Should have some value (exact value depends on timezone)
+      expect(dateInput.value).toMatch(/^\d{4}-\d{2}-\d{2}$/);
+      expect(timeInput.value).toMatch(/^\d{2}:\d{2}$/);
+    });
+  });
 });

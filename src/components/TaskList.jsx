@@ -10,20 +10,18 @@ import TaskItem from './TaskItem';
 import AddTaskBlock from './AddTaskBlock';
 import { isOverdue } from '../utils/urgency';
 import { DENSITY_MODES } from '../utils/density';
-import { COLORS } from '../constants/colors';
 
 /**
  * TaskList - Displays tasks and add task block
  * @param {Array} tasks - Array of task objects
  * @param {function} onClick - Callback when task clicked
- * @param {function} onEdit - Callback for editing a task
  * @param {function} onDelete - Callback for deleting a task
  * @param {function} onComplete - Callback for completing a task
  * @param {function} onAddTask - Callback for opening task creation form
  * @param {string} density - Density mode for layout
  * @returns {JSX.Element}
  */
-function TaskList({ tasks, onClick, onEdit, onDelete, onComplete, onAddTask, density = DENSITY_MODES.COMFORTABLE }) {
+function TaskList({ tasks, onClick, onDelete, onComplete, onAddTask, density = DENSITY_MODES.COMFORTABLE }) {
   // Separate tasks into overdue and upcoming
   const overdueTasks = tasks.filter(task => isOverdue(task.deadline));
   const upcomingTasks = tasks.filter(task => !isOverdue(task.deadline));
@@ -72,7 +70,6 @@ function TaskList({ tasks, onClick, onEdit, onDelete, onComplete, onAddTask, den
                 key={task.id}
                 task={task}
                 onClick={onClick}
-                onEdit={onEdit}
                 onDelete={onDelete}
                 onComplete={onComplete}
               />
@@ -97,7 +94,6 @@ function TaskList({ tasks, onClick, onEdit, onDelete, onComplete, onAddTask, den
                 key={task.id}
                 task={task}
                 onClick={onClick}
-                onEdit={onEdit}
                 onDelete={onDelete}
                 onComplete={onComplete}
               />
@@ -129,11 +125,11 @@ const styles = {
   sectionHeader: {
     fontSize: '20px',
     fontWeight: 'bold',
-    color: COLORS.textDark,
+    color: 'var(--text-primary)',
     marginBottom: '15px',
     marginTop: '10px',
     paddingBottom: '8px',
-    borderBottom: `2px solid ${COLORS.borderLight}`
+    borderBottom: '2px solid var(--border-primary)'
   }
 };
 

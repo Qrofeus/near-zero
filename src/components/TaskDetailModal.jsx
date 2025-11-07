@@ -6,7 +6,6 @@
 import Modal from './Modal';
 import { formatAbsoluteTime } from '../utils/datetime';
 import { getUrgencyColor, formatRelativeTime } from '../utils/urgency';
-import { COLORS } from '../constants/colors';
 
 /**
  * TaskDetailModal - Shows complete task information and actions
@@ -14,11 +13,10 @@ import { COLORS } from '../constants/colors';
  * @param {object} task - Task object to display
  * @param {function} onClose - Callback to close modal
  * @param {function} onEdit - Callback when edit clicked (receives task.id)
- * @param {function} onChangeDeadline - Callback when change deadline clicked (receives task.id)
  * @param {function} onDelete - Callback when delete clicked (receives task.id)
  * @returns {JSX.Element}
  */
-function TaskDetailModal({ isOpen, task, onClose, onEdit, onChangeDeadline, onDelete }) {
+function TaskDetailModal({ isOpen, task, onClose, onEdit, onDelete }) {
   if (!isOpen || !task) return null;
 
   /**
@@ -47,13 +45,13 @@ function TaskDetailModal({ isOpen, task, onClose, onEdit, onChangeDeadline, onDe
   const getPriorityColor = (priority) => {
     switch (priority) {
       case 1:
-        return COLORS.priorityHigh;
+        return '#dc2626'; // Red - high priority
       case 2:
-        return COLORS.priorityMedium;
+        return '#ea580c'; // Orange - medium priority
       case 3:
-        return COLORS.priorityLow;
+        return '#16a34a'; // Green - low priority
       default:
-        return COLORS.priorityDefault;
+        return '#6c757d'; // Gray - default
     }
   };
 
@@ -116,12 +114,6 @@ function TaskDetailModal({ isOpen, task, onClose, onEdit, onChangeDeadline, onDe
             Edit Task
           </button>
           <button
-            onClick={() => onChangeDeadline(task.id)}
-            style={{ ...styles.button, ...styles.changeDeadlineButton }}
-          >
-            Change Deadline
-          </button>
-          <button
             onClick={() => onDelete(task.id)}
             style={{ ...styles.button, ...styles.deleteButton }}
           >
@@ -146,15 +138,15 @@ const styles = {
   title: {
     fontSize: '24px',
     fontWeight: 'bold',
-    color: COLORS.textDark,
+    color: 'var(--text-primary)',
     flex: 1,
     paddingRight: '10px'
   },
   closeButton: {
     padding: '4px 8px',
     fontSize: '20px',
-    color: COLORS.textLight,
-    backgroundColor: COLORS.bgTransparent,
+    color: 'var(--text-secondary)',
+    backgroundColor: 'transparent',
     border: '2px solid transparent',
     cursor: 'pointer',
     borderRadius: '4px',
@@ -169,7 +161,7 @@ const styles = {
     display: 'inline-block',
     padding: '6px 12px',
     borderRadius: '4px',
-    color: COLORS.bgWhite,
+    color: '#fff',
     fontSize: '14px',
     fontWeight: 'bold'
   },
@@ -180,11 +172,11 @@ const styles = {
     margin: '0 0 10px 0',
     fontSize: '16px',
     fontWeight: 'bold',
-    color: COLORS.textMedium
+    color: 'var(--text-secondary)'
   },
   description: {
     fontSize: '15px',
-    color: COLORS.textDark,
+    color: 'var(--text-primary)',
     lineHeight: '1.6',
     whiteSpace: 'pre-wrap' // Preserve line breaks
   },
@@ -195,7 +187,7 @@ const styles = {
   },
   absoluteTime: {
     fontSize: '14px',
-    color: COLORS.textLighter
+    color: 'var(--text-tertiary)'
   },
   actions: {
     display: 'flex',
@@ -214,16 +206,12 @@ const styles = {
     flex: '1 1 auto'
   },
   editButton: {
-    backgroundColor: COLORS.primary,
-    color: COLORS.bgWhite
-  },
-  changeDeadlineButton: {
-    backgroundColor: COLORS.warning,
-    color: COLORS.textDark
+    backgroundColor: 'var(--accent)',
+    color: '#fff'
   },
   deleteButton: {
-    backgroundColor: COLORS.danger,
-    color: COLORS.bgWhite
+    backgroundColor: 'var(--error)',
+    color: '#fff'
   }
 };
 

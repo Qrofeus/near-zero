@@ -5,7 +5,6 @@
  */
 
 import { useEffect } from 'react';
-import { COLORS } from '../constants/colors';
 
 /**
  * Modal - Generic modal overlay
@@ -71,16 +70,16 @@ const styles = {
     padding: '20px'
   },
   modal: {
-    backgroundColor: COLORS.bgWhite,
+    backgroundColor: 'var(--bg-primary)',
     borderRadius: '12px',
-    boxShadow: '0 10px 40px rgba(0, 0, 0, 0.3)',
+    boxShadow: '0 10px 40px var(--shadow-lg)',
     maxHeight: '90vh',
     overflow: 'auto',
     width: '100%',
     // Minimal scrollbar styling (webkit browsers)
     WebkitOverflowScrolling: 'touch',
     scrollbarWidth: 'thin', // Firefox
-    scrollbarColor: `${COLORS.scrollbarThumb} ${COLORS.scrollbarTrack}` // Firefox: thumb track
+    scrollbarColor: 'var(--scrollbar-thumb) var(--scrollbar-track)' // Firefox: thumb track
   }
 };
 

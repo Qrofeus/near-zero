@@ -37,7 +37,6 @@ describe('TaskList', () => {
     render(
       <TaskList
         tasks={mockTasks}
-        onEdit={() => {}}
         onDelete={() => {}}
         onComplete={() => {}}
         onAddTask={() => {}}
@@ -52,7 +51,6 @@ describe('TaskList', () => {
     render(
       <TaskList
         tasks={[]}
-        onEdit={() => {}}
         onDelete={() => {}}
         onComplete={() => {}}
         onAddTask={() => {}}
@@ -63,14 +61,12 @@ describe('TaskList', () => {
   });
 
   it('passes callbacks to TaskItem components', () => {
-    const onEdit = vi.fn();
     const onDelete = vi.fn();
     const onComplete = vi.fn();
 
     render(
       <TaskList
         tasks={mockTasks}
-        onEdit={onEdit}
         onDelete={onDelete}
         onComplete={onComplete}
         onAddTask={() => {}}
@@ -78,8 +74,7 @@ describe('TaskList', () => {
     );
 
     // Verify all tasks are rendered (callbacks will be tested in TaskItem tests)
-    expect(screen.getAllByRole('button', { name: /edit/i })).toHaveLength(2);
-    expect(screen.getAllByRole('button', { name: /delete/i })).toHaveLength(2);
+    expect(screen.getAllByLabelText('Delete task')).toHaveLength(2);
     expect(screen.getAllByRole('button', { name: /complete/i })).toHaveLength(2);
   });
 
@@ -87,7 +82,6 @@ describe('TaskList', () => {
     render(
       <TaskList
         tasks={mockTasks}
-        onEdit={() => {}}
         onDelete={() => {}}
         onComplete={() => {}}
         onAddTask={() => {}}
@@ -106,7 +100,6 @@ describe('TaskList', () => {
     render(
       <TaskList
         tasks={mockTasks}
-        onEdit={() => {}}
         onDelete={() => {}}
         onComplete={() => {}}
         onAddTask={onAddTask}

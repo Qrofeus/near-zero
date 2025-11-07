@@ -4,7 +4,6 @@
  */
 
 import { SORT_MODES } from '../utils/sorting';
-import { COLORS } from '../constants/colors';
 
 function SortToggle({ currentMode, onModeChange }) {
   return (
@@ -25,7 +24,8 @@ function SortToggle({ currentMode, onModeChange }) {
           onClick={() => onModeChange(SORT_MODES.PRIORITY)}
           style={{
             ...styles.button,
-            ...(currentMode === SORT_MODES.PRIORITY ? styles.buttonActive : {})
+            ...(currentMode === SORT_MODES.PRIORITY ? styles.buttonActive : {}),
+            borderRight: 'none'
           }}
           aria-pressed={currentMode === SORT_MODES.PRIORITY}
         >
@@ -40,18 +40,17 @@ const styles = {
   container: {
     display: 'flex',
     alignItems: 'center',
-    gap: '10px',
-    marginBottom: '20px',
+    gap: '10px'
   },
   label: {
     fontSize: '14px',
     fontWeight: '600',
-    color: COLORS.textDark,
+    color: 'var(--text-primary)',
   },
   toggleGroup: {
     display: 'flex',
     gap: '0',
-    border: `2px solid ${COLORS.primary}`,
+    border: '2px solid var(--accent)',
     borderRadius: '6px',
     overflow: 'hidden',
   },
@@ -59,17 +58,17 @@ const styles = {
     padding: '6px 16px',
     fontSize: '14px',
     fontWeight: '500',
-    color: COLORS.primary,
-    backgroundColor: COLORS.bgWhite,
+    color: 'var(--accent)',
+    backgroundColor: 'var(--bg-primary)',
     border: 'none',
     cursor: 'pointer',
     transition: 'all 0.2s',
-    borderRight: `1px solid ${COLORS.primary}`,
+    borderRight: '1px solid var(--accent)',
     outline: 'none'
   },
   buttonActive: {
-    backgroundColor: COLORS.primary,
-    color: COLORS.bgWhite,
+    backgroundColor: 'var(--accent)',
+    color: '#fff',
     fontWeight: '600',
   },
 };

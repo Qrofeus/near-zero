@@ -1,10 +1,10 @@
 /**
  * TaskForm Component
- * Form for creating new tasks with native date/time inputs
+ * Form for creating new tasks or editing existing tasks with native date/time inputs
  */
 
 import { useState, useRef, useEffect } from 'react';
-import { COLORS } from '../constants/colors';
+import { utcToLocalDate, utcToLocalTime } from '../utils/datetime';
 
 /**
  * Get default deadline (next day 6 PM local time)
@@ -28,20 +28,27 @@ function getDefaultDeadline() {
 }
 
 /**
- * TaskForm - A controlled form component for creating tasks
+ * TaskForm - A controlled form component for creating or editing tasks
  * @param {function} onSubmit - Callback when form is submitted with task data
+ * @param {object} task - Optional task object for editing (contains id, title, description, deadline, priority)
  * @returns {JSX.Element}
  */
-function TaskForm({ onSubmit }) {
+function TaskForm({ onSubmit, task = null }) {
+  const isEditMode = !!task;
   const defaults = getDefaultDeadline();
 
   // useState hook: Creates state variables that persist across re-renders
   // Each call returns [currentValue, setterFunction]
-  const [title, setTitle] = useState('');
-  const [description, setDescription] = useState('');
-  const [dateString, setDateString] = useState(defaults.dateString);
-  const [timeString, setTimeString] = useState(defaults.timeString);
-  const [priority, setPriority] = useState(2); // Default: Medium
+  // In edit mode, initialize with task data; otherwise use defaults
+  const [title, setTitle] = useState(task?.title || '');
+  const [description, setDescription] = useState(task?.description || '');
+  const [dateString, setDateString] = useState(
+    task ? utcToLocalDate(task.deadline) : defaults.dateString
+  );
+  const [timeString, setTimeString] = useState(
+    task ? utcToLocalTime(task.deadline) : defaults.timeString
+  );
+  const [priority, setPriority] = useState(task?.priority || 2); // Default: Medium
 
   // useRef: Create a reference to the title input for auto-focus
   const titleInputRef = useRef(null);
@@ -69,21 +76,30 @@ function TaskForm({ onSubmit }) {
     }
 
     // Call parent's onSubmit with form data
-    onSubmit({
+    // In edit mode, include taskId
+    const formData = {
       title: title.trim(),
       description: description.trim(),
       dateString,
       timeString,
       priority: Number(priority) // Ensure priority is a number
-    });
+    };
 
-    // Clear form after submission and reset to next day 6 PM
-    const newDefaults = getDefaultDeadline();
-    setTitle('');
-    setDescription('');
-    setDateString(newDefaults.dateString);
-    setTimeString(newDefaults.timeString);
-    setPriority(2);
+    if (isEditMode) {
+      formData.taskId = task.id;
+    }
+
+    onSubmit(formData);
+
+    // Clear form only in create mode (not edit mode)
+    if (!isEditMode) {
+      const newDefaults = getDefaultDeadline();
+      setTitle('');
+      setDescription('');
+      setDateString(newDefaults.dateString);
+      setTimeString(newDefaults.timeString);
+      setPriority(2);
+    }
   };
 
   return (
@@ -176,7 +192,7 @@ function TaskForm({ onSubmit }) {
 
       {/* Submit button */}
       <button type="submit" style={styles.button}>
-        Add Task
+        {isEditMode ? 'Update Task' : 'Add Task'}
       </button>
     </form>
   );
@@ -185,11 +201,11 @@ function TaskForm({ onSubmit }) {
 // Basic inline styles for the form
 const styles = {
   form: {
-    backgroundColor: COLORS.bgOffWhite,
+    backgroundColor: 'var(--bg-secondary)',
     padding: '20px',
     borderRadius: '8px',
     marginBottom: '20px',
-    border: `1px solid ${COLORS.borderLight}`
+    border: '1px solid var(--border-primary)'
   },
   field: {
     marginBottom: '15px',
@@ -200,31 +216,36 @@ const styles = {
     marginBottom: '5px',
     fontWeight: 'bold',
     fontSize: '14px',
-    color: COLORS.textDark
+    color: 'var(--text-primary)'
   },
   input: {
     padding: '8px 12px',
     fontSize: '14px',
-    border: `1px solid ${COLORS.borderMedium}`,
+    border: '1px solid var(--border-secondary)',
     borderRadius: '4px',
-    outline: 'none'
+    outline: 'none',
+    backgroundColor: 'var(--bg-primary)',
+    color: 'var(--text-primary)'
   },
   textarea: {
     padding: '8px 12px',
     fontSize: '14px',
-    border: `1px solid ${COLORS.borderMedium}`,
+    border: '1px solid var(--border-secondary)',
     borderRadius: '4px',
     outline: 'none',
     fontFamily: 'inherit',
-    resize: 'vertical'
+    resize: 'vertical',
+    backgroundColor: 'var(--bg-primary)',
+    color: 'var(--text-primary)'
   },
   select: {
     padding: '8px 12px',
     fontSize: '14px',
-    border: `1px solid ${COLORS.borderMedium}`,
+    border: '1px solid var(--border-secondary)',
     borderRadius: '4px',
     outline: 'none',
-    backgroundColor: COLORS.bgWhite
+    backgroundColor: 'var(--bg-primary)',
+    color: 'var(--text-primary)'
   },
   dateTimeRow: {
     display: 'flex',
@@ -234,8 +255,8 @@ const styles = {
     padding: '10px 20px',
     fontSize: '16px',
     fontWeight: 'bold',
-    color: COLORS.bgWhite,
-    backgroundColor: COLORS.primary,
+    color: '#fff',
+    backgroundColor: 'var(--accent)',
     border: '2px solid transparent',
     borderRadius: '4px',
     cursor: 'pointer',
