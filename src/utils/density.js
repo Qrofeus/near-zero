@@ -71,21 +71,3 @@ export function setDensity(density) {
   }
 }
 
-/**
- * Get column count for a given density mode
- * Used for CSS grid-template-columns
- * @param {string} density - Density mode
- * @returns {number} Number of columns
- */
-export function getColumnsForDensity(density) {
-  switch (density) {
-    case DENSITY_MODES.COMPACT:
-      return 3; // Will use auto-fit with min 250px
-    case DENSITY_MODES.COMFORTABLE:
-      return 2;
-    case DENSITY_MODES.SPACIOUS:
-      return 1;
-    default:
-      return 2; // comfortable default
-  }
-}

@@ -4,6 +4,7 @@
  * Converts UTC deadline to local time for display
  */
 
+import { GoTrash } from 'react-icons/go';
 import { formatAbsoluteTime } from '../utils/datetime';
 import { getUrgencyColor, formatRelativeTime, getTimeRemaining, isOverdue } from '../utils/urgency';
 
@@ -35,24 +36,24 @@ function TaskItem({ task, onClick, onDelete, onComplete }) {
   };
 
   /**
-   * Get priority color
+   * Get priority color using Open Props
    * @param {number} priority
    * @returns {string}
    */
   const getPriorityColor = (priority) => {
     switch (priority) {
       case 1:
-        return '#dc2626'; // Red - high priority
+        return 'var(--red-6)'; // High priority
       case 2:
-        return '#ea580c'; // Orange - medium priority
+        return 'var(--orange-6)'; // Medium priority
       case 3:
-        return '#16a34a'; // Green - low priority
+        return 'var(--green-6)'; // Low priority
       default:
-        return '#6c757d'; // Gray - default
+        return 'var(--stone-6)'; // Default
     }
   };
 
-  const urgencyColor = getUrgencyColor(task.deadline);
+  const urgencyColors = getUrgencyColor(task.deadline);
   const relativeTime = formatRelativeTime(task.deadline);
 
   // Check if task needs pulse animation (<1hr remaining)
@@ -72,7 +73,10 @@ function TaskItem({ task, onClick, onDelete, onComplete }) {
     <div
       style={{
         ...styles.card,
-        borderLeft: `4px solid ${urgencyColor}`
+        ...(urgencyColors && {
+          borderLeft: `4px solid ${urgencyColors.borderColor}`,
+          backgroundColor: urgencyColors.backgroundColor
+        })
       }}
       className={`task-card ${className.trim()}`}
       onClick={() => onClick && onClick(task.id)}
@@ -80,7 +84,11 @@ function TaskItem({ task, onClick, onDelete, onComplete }) {
       {/* 2x2 Grid Layout */}
       <div style={styles.gridContainer}>
         {/* Top Left: Title */}
-        <h3 style={styles.title}>{task.title}</h3>
+        <h3 style={{
+          ...styles.title,
+          // For tasks without urgency colors (overdue/normal), match time text color in dark mode
+          color: urgencyColors ? styles.title.color : 'var(--text-primary)'
+        }}>{task.title}</h3>
 
         {/* Top Right: Priority + Delete */}
         <div style={styles.headerActions}>
@@ -102,15 +110,16 @@ function TaskItem({ task, onClick, onDelete, onComplete }) {
             aria-label="Delete task"
             title="Delete task"
           >
-            <svg width="16" height="16" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg">
-              <path d="M2 4h12M5.333 4V2.667a1.333 1.333 0 0 1 1.334-1.334h2.666a1.333 1.333 0 0 1 1.334 1.334V4m2 0v9.333a1.333 1.333 0 0 1-1.334 1.334H4.667a1.333 1.333 0 0 1-1.334-1.334V4h9.334Z" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
-            </svg>
+            <GoTrash size={16} />
           </button>
         </div>
 
         {/* Bottom Left: Time Info */}
         <div style={styles.timeInfo}>
-          <div style={{ ...styles.relativeTime, color: urgencyColor }}>
+          <div style={{
+            ...styles.relativeTime,
+            color: urgencyColors ? urgencyColors.borderColor : 'var(--text-primary)'
+          }}>
             {relativeTime}
           </div>
           <div style={styles.absoluteTime}>
@@ -155,7 +164,7 @@ const styles = {
   title: {
     fontSize: '18px',
     fontWeight: 'bold',
-    color: 'var(--text-primary)',
+    color: 'var(--stone-12)',
     margin: 0,
     overflow: 'hidden',
     textOverflow: 'ellipsis',
@@ -168,11 +177,13 @@ const styles = {
     justifyContent: 'flex-end'
   },
   priorityBadge: {
-    padding: '6px 12px',
+    padding: '6px 0',
     borderRadius: '4px',
-    color: '#fff',
+    color: 'var(--stone-0)',
     fontSize: '12px',
-    fontWeight: 'bold'
+    fontWeight: 'bold',
+      textAlign: 'center',
+      minWidth: '72px',
   },
   deleteIcon: {
     backgroundColor: 'transparent',
@@ -191,15 +202,23 @@ const styles = {
   timeInfo: {
     display: 'flex',
     flexDirection: 'column',
-    gap: '4px'
+    gap: '4px',
+    overflow: 'hidden',
+    minWidth: 0
   },
   relativeTime: {
     fontSize: '16px',
-    fontWeight: 'bold'
+    fontWeight: 'bold',
+    whiteSpace: 'nowrap',
+    overflow: 'hidden',
+    textOverflow: 'ellipsis'
   },
   absoluteTime: {
     fontSize: '12px',
-    color: 'var(--text-tertiary)'
+    color: 'var(--text-tertiary)',
+    whiteSpace: 'nowrap',
+    overflow: 'hidden',
+    textOverflow: 'ellipsis'
   },
   button: {
     padding: '8px 16px',
@@ -215,7 +234,7 @@ const styles = {
   },
   completeButton: {
     backgroundColor: 'var(--success)',
-    color: '#fff'
+    color: 'var(--stone-0)'
   }
 };
 

@@ -4,7 +4,6 @@ import {
   saveToStorage,
   removeFromStorage,
   isStorageAvailable,
-  clearAllStorage,
   STORAGE_KEYS,
 } from '../utils/storage';
 
@@ -143,31 +142,4 @@ describe('Storage Utilities', () => {
     });
   });
 
-  describe('clearAllStorage', () => {
-    it('should clear tasks and preferences from storage', () => {
-      localStorage.setItem(STORAGE_KEYS.TASKS, '[]');
-      localStorage.setItem(STORAGE_KEYS.PREFS, '{}');
-      localStorage.setItem('other-key', 'keep-this');
-
-      const result = clearAllStorage();
-
-      expect(result).toBe(true);
-      expect(localStorage.getItem(STORAGE_KEYS.TASKS)).toBe(null);
-      expect(localStorage.getItem(STORAGE_KEYS.PREFS)).toBe(null);
-      expect(localStorage.getItem('other-key')).toBe('keep-this');
-    });
-
-    it('should return false on error', () => {
-      const originalRemoveItem = Storage.prototype.removeItem;
-      Storage.prototype.removeItem = vi.fn(() => {
-        throw new Error('Storage error');
-      });
-
-      const result = clearAllStorage();
-
-      expect(result).toBe(false);
-
-      Storage.prototype.removeItem = originalRemoveItem;
-    });
-  });
 });

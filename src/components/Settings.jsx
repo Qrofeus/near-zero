@@ -4,6 +4,7 @@
  */
 
 import { useRef, useState } from 'react';
+import { GoBook } from 'react-icons/go';
 import Modal from './Modal';
 import ThemeControl from './ThemeControl';
 import HelpModal from './HelpModal';
@@ -163,7 +164,7 @@ function Settings({
             style={styles.helpButton}
             aria-label="Open help documentation"
           >
-            📖 How to Use NearZero
+            <GoBook /> How to Use NearZero
           </button>
           <p style={styles.hint}>
             Learn about features, keyboard shortcuts, and privacy
@@ -207,7 +208,7 @@ const styles = {
   section: {
     marginBottom: '24px',
     paddingBottom: '24px',
-    borderBottom: '1px solid var(--border-primary)'
+    borderBottom: '1px solid var(--border-primary)',
   },
   sectionTitle: {
     fontSize: '16px',

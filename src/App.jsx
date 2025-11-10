@@ -3,7 +3,8 @@
  * Main application component that manages task state and integrates all UI components
  */
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
+import { GoPlus, GoGear, GoTasklist } from 'react-icons/go';
 import TaskForm from './components/TaskForm';
 import TaskList from './components/TaskList';
 import SortToggle from './components/SortToggle';
@@ -115,6 +116,11 @@ function App() {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
 
   /**
+   * Navbar scroll state
+   */
+  const [isScrolled, setIsScrolled] = useState(false);
+
+  /**
    * Toast notification state
    */
   const [toast, setToast] = useState({
@@ -130,6 +136,12 @@ function App() {
   const [demoMode, setDemoModeState] = useState(() => getDemoMode());
   const [storageAvailable, setStorageAvailable] = useState(true);
   const [inMemoryTasks, setInMemoryTasks] = useState([]);
+
+  /**
+   * Ref to measure banner height for dynamic padding
+   */
+  const bannerRef = useRef(null);
+  const [bannerHeight, setBannerHeight] = useState(0);
 
   /**
    * Helper functions for showing modals
@@ -191,7 +203,7 @@ function App() {
       const exampleTasks = generateExampleTasks();
       setInMemoryTasks(exampleTasks);
       setTasks(exampleTasks);
-      showToast('Demo mode active - example tasks loaded', 'info');
+      showToast('Enabled: Demo Mode', 'info');
     } else if (!hasStorage) {
       // localStorage unavailable - start with empty list
       setInMemoryTasks([]);
@@ -288,6 +300,30 @@ function App() {
   }, [mobileMenuOpen]);
 
   /**
+   * useEffect: Measure banner height when banner visibility changes
+   */
+  useEffect(() => {
+    const isBannerVisible = demoMode || !storageAvailable;
+    if (bannerRef.current && isBannerVisible) {
+      setBannerHeight(bannerRef.current.offsetHeight);
+    } else {
+      setBannerHeight(0);
+    }
+  }, [demoMode, storageAvailable]);
+
+  /**
+   * useEffect: Track scroll position for navbar shadow
+   */
+  useEffect(() => {
+    const handleScroll = () => {
+      setIsScrolled(window.scrollY > 0);
+    };
+
+    window.addEventListener('scroll', handleScroll);
+    return () => window.removeEventListener('scroll', handleScroll);
+  }, []);
+
+  /**
    * Handle form submission for new task
    * @param {object} formData - { title, description, dateString, timeString, priority }
    */
@@ -319,6 +355,7 @@ function App() {
       setInMemoryTasks(updatedTasks);
       setTasks(updatedTasks);
       setShowForm(false);
+      showToast('Task Created', 'success');
       return;
     }
 
@@ -340,6 +377,7 @@ function App() {
     setTasks(getAllTasks());
     // Hide form after successful save
     setShowForm(false);
+    showToast('Task Created', 'success');
   };
 
   /**
@@ -373,7 +411,7 @@ function App() {
       setInMemoryTasks(updatedTasks);
       setTasks(updatedTasks);
       setEditingTask(null);
-      showToast('Task updated successfully', 'success');
+      showToast('Task Updated', 'success');
       return;
     }
 
@@ -393,7 +431,7 @@ function App() {
     // Update state with updated task list
     setTasks(getAllTasks());
     setEditingTask(null);
-    showToast('Task updated successfully', 'success');
+    showToast('Task Updated', 'success');
   };
 
   /**
@@ -442,6 +480,7 @@ function App() {
           const updatedTasks = inMemoryTasks.filter(t => t.id !== taskId);
           setInMemoryTasks(updatedTasks);
           setTasks(updatedTasks);
+          showToast('Task Deleted', 'success');
           return;
         }
 
@@ -449,6 +488,7 @@ function App() {
         const result = removeTask(taskId);
         if (result.success) {
           setTasks(getAllTasks());
+          showToast('Task Deleted', 'success');
         } else {
           showAlert('Error', `Failed to delete: ${result.errors.join(', ')}`, 'danger');
         }
@@ -476,6 +516,7 @@ function App() {
           const updatedTasks = inMemoryTasks.filter(t => t.id !== taskId);
           setInMemoryTasks(updatedTasks);
           setTasks(updatedTasks);
+          showToast('Task Completed', 'success');
           return;
         }
 
@@ -483,6 +524,7 @@ function App() {
         const result = removeTask(taskId);
         if (result.success) {
           setTasks(getAllTasks());
+          showToast('Task Completed', 'success');
         } else {
           showAlert('Error', `Failed to complete: ${result.errors.join(', ')}`, 'danger');
         }
@@ -503,13 +545,13 @@ function App() {
       const exampleTasks = generateExampleTasks();
       setInMemoryTasks(exampleTasks);
       setTasks(exampleTasks);
-      showToast('Demo mode enabled - example tasks loaded', 'success');
+      showToast('Enabled: Demo Mode', 'success');
     } else {
       // Exiting demo mode - load from localStorage
       const loadedTasks = storageAvailable ? getAllTasks() : [];
       setInMemoryTasks([]);
       setTasks(loadedTasks);
-      showToast('Demo mode disabled', 'info');
+      showToast('Disabled: Demo Mode', 'info');
     }
 
     setShowSettings(false);
@@ -523,13 +565,13 @@ function App() {
       // In demo mode or storage unavailable: update in-memory only
       setInMemoryTasks(importedTasks);
       setTasks(importedTasks);
-      showToast(`Imported ${importedTasks.length} tasks (in-memory only)`, 'success');
+      showToast(`Imported: ${importedTasks.length} tasks`, 'success');
     } else {
       // Normal mode: save to localStorage
       const saved = saveToStorage(STORAGE_KEYS.TASKS, importedTasks);
       if (saved) {
         setTasks(getAllTasks());
-        showToast(`Imported ${importedTasks.length} tasks successfully`, 'success');
+        showToast(`Imported: ${importedTasks.length} tasks`, 'success');
       } else {
         showAlert('Error', 'Failed to save imported tasks', 'danger');
       }
@@ -548,7 +590,7 @@ function App() {
    * Handle export success
    */
   const handleExportSuccess = () => {
-    showToast('Tasks exported successfully', 'success');
+    showToast('Exported: Tasks', 'success');
   };
 
   /**
@@ -597,17 +639,16 @@ function App() {
 
   return (
     <div style={styles.app}>
-      {/* Banner for demo mode or storage unavailable */}
-      <Banner
-        isVisible={bannerInfo.isVisible}
-        message={bannerInfo.message}
-        variant={bannerInfo.variant}
-      />
-
-      <header style={styles.navbar}>
+      <header style={{
+        ...styles.navbar,
+        boxShadow: isScrolled ? 'var(--shadow-sm)' : 'none'
+      }}>
         <div style={styles.logo} className="navbar-logo">
-          <h1 style={styles.title}>NearZero</h1>
-          <p style={styles.subtitle} className="navbar-subtitle">Privacy-first task manager</p>
+          <GoTasklist style={styles.logoIcon} />
+          <div style={styles.logoText}>
+            <h1 style={styles.title}>NearZero</h1>
+            <p style={styles.subtitle} className="navbar-subtitle">Privacy-first task manager</p>
+          </div>
         </div>
 
         {/* Desktop nav links */}
@@ -618,7 +659,7 @@ function App() {
             className="nav-button"
             aria-label="Add new task (press Q)"
           >
-            + Add Task (Q)
+            <GoPlus /> Add Task (Q)
           </button>
           <button
             onClick={() => setShowSettings(true)}
@@ -626,7 +667,7 @@ function App() {
             className="nav-button"
             aria-label="Open settings"
           >
-            ⚙ Settings
+            <GoGear /> Settings
           </button>
         </div>
 
@@ -656,7 +697,7 @@ function App() {
             style={styles.mobileMenuItem}
             aria-label="Add new task (press Q)"
           >
-            + Add Task (Q)
+            <GoPlus /> Add Task (Q)
           </button>
           <button
             onClick={() => {
@@ -666,7 +707,7 @@ function App() {
             style={styles.mobileMenuItem}
             aria-label="Open settings"
           >
-            ⚙ Settings
+            <GoGear /> Settings
           </button>
         </div>
 
@@ -679,7 +720,7 @@ function App() {
         )}
       </header>
 
-      <main style={styles.main}>
+      <main style={{ ...styles.main, paddingBottom: `${bannerHeight + 20}px` }}>
         {/* Controls: Sort and Density */}
         {tasks.length > 0 && (
           <div style={styles.controls}>
@@ -790,6 +831,18 @@ function App() {
         duration={toast.duration}
         onClose={closeToast}
       />
+
+      {/* Banner for demo mode or storage unavailable */}
+      <div ref={bannerRef}>
+        <Banner
+          isVisible={bannerInfo.isVisible}
+          message={bannerInfo.message}
+          variant={bannerInfo.variant}
+        />
+      </div>
+
+      {/* Fade gradient overlay at bottom */}
+      <div style={styles.fadeOverlay} />
     </div>
   );
 }
@@ -810,25 +863,33 @@ const styles = {
     alignItems: 'center',
     padding: '0.5em 2em',
     backgroundColor: 'var(--bg-primary)',
-    borderBottom: '1px solid var(--border-primary)',
     zIndex: 999,
-    minHeight: '60px'
+    height: '70px',
+    transition: 'box-shadow 0.2s ease'
   },
   logo: {
     display: 'flex',
+    alignItems: 'center',
+    gap: '12px'
+  },
+  logoIcon: {
+    fontSize: '2rem',
+    color: 'var(--text-primary)'
+  },
+  logoText: {
+    display: 'flex',
     flexDirection: 'column',
-    gap: '2px'
   },
   title: {
     fontSize: '1.8rem',
     fontWeight: 'bold',
     color: 'var(--text-primary)',
-    margin: 0
+      lineHeight: 1,
   },
   subtitle: {
     fontSize: '0.75rem',
     color: 'var(--text-secondary)',
-    margin: 0
+      lineHeight: 0.75
   },
   navLinks: {
     display: 'flex',
@@ -846,7 +907,10 @@ const styles = {
     borderRadius: '5px',
     cursor: 'pointer',
     transition: 'background-color 0.2s',
-    outline: 'none'
+    outline: 'none',
+    display: 'flex',
+    alignItems: 'center',
+    gap: '6px'
   },
   settingsButton: {
     padding: '0.5em 1em',
@@ -858,7 +922,10 @@ const styles = {
     borderRadius: '5px',
     cursor: 'pointer',
     transition: 'background-color 0.2s',
-    outline: 'none'
+    outline: 'none',
+    display: 'flex',
+    alignItems: 'center',
+    gap: '6px'
   },
   hamburgerButton: {
     display: 'none',
@@ -874,10 +941,10 @@ const styles = {
   },
   mobileMenu: {
     position: 'fixed',
-    top: '60px',
+    top: '70px',
     right: 0,
     width: '75%',
-    height: 'calc(100vh - 60px)',
+    height: 'calc(100vh - 70px)',
     backgroundColor: 'var(--bg-primary)',
     boxShadow: '-2px 0 8px var(--shadow-lg)',
     display: 'flex',
@@ -898,11 +965,14 @@ const styles = {
     cursor: 'pointer',
     textAlign: 'left',
     transition: 'background-color 0.2s',
-    outline: 'none'
+    outline: 'none',
+    display: 'flex',
+    alignItems: 'center',
+    gap: '6px'
   },
   mobileMenuOverlay: {
     position: 'fixed',
-    top: '60px',
+    top: '70px',
     left: 0,
     right: 0,
     bottom: 0,
@@ -947,6 +1017,16 @@ const styles = {
     borderRadius: '4px',
     lineHeight: 1,
     outline: 'none'
+  },
+  fadeOverlay: {
+    position: 'fixed',
+    bottom: 0,
+    left: 0,
+    right: 0,
+    height: '200px',
+    background: 'linear-gradient(to top, var(--bg-secondary) 0%, var(--bg-secondary) 20%, transparent 100%)',
+    pointerEvents: 'none',
+    zIndex: 997
   }
 };
 

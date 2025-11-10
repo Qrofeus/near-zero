@@ -6,10 +6,7 @@ import {
   utcToLocalTime,
   getCurrentUTC,
   isInPast,
-  getTimeRemaining,
-  formatRelativeTime,
   formatAbsoluteTime,
-  getTimeRemainingFormatted,
 } from '../utils/datetime';
 
 describe('DateTime Utilities', () => {
@@ -125,53 +122,6 @@ describe('DateTime Utilities', () => {
     });
   });
 
-  describe('getTimeRemaining', () => {
-    it('should return positive milliseconds for future dates', () => {
-      const futureDate = dayjs().add(1, 'hour').toISOString();
-
-      const result = getTimeRemaining(futureDate);
-
-      expect(result).toBeGreaterThan(0);
-      expect(result).toBeLessThanOrEqual(3600000); // 1 hour in ms
-    });
-
-    it('should return negative milliseconds for past dates', () => {
-      const pastDate = dayjs().subtract(1, 'hour').toISOString();
-
-      const result = getTimeRemaining(pastDate);
-
-      expect(result).toBeLessThan(0);
-    });
-
-    it('should return approximately correct time for 30 minutes in future', () => {
-      const futureDate = dayjs().add(30, 'minutes').toISOString();
-
-      const result = getTimeRemaining(futureDate);
-
-      // Allow 1 second tolerance
-      expect(result).toBeGreaterThan(29 * 60 * 1000);
-      expect(result).toBeLessThanOrEqual(30 * 60 * 1000 + 1000);
-    });
-  });
-
-  describe('formatRelativeTime', () => {
-    it('should format future dates with "in" prefix', () => {
-      const futureDate = dayjs().add(2, 'hours').toISOString();
-
-      const result = formatRelativeTime(futureDate);
-
-      expect(result).toContain('in');
-    });
-
-    it('should format past dates with "ago" suffix', () => {
-      const pastDate = dayjs().subtract(2, 'hours').toISOString();
-
-      const result = formatRelativeTime(pastDate);
-
-      expect(result).toContain('ago');
-    });
-  });
-
   describe('formatAbsoluteTime', () => {
     it('should format date with default format', () => {
       const date = '2025-12-25T18:00:00.000Z';
@@ -191,46 +141,4 @@ describe('DateTime Utilities', () => {
     });
   });
 
-  describe('getTimeRemainingFormatted', () => {
-    it('should return "Overdue" for past dates', () => {
-      const pastDate = dayjs().subtract(1, 'hour').toISOString();
-
-      const result = getTimeRemainingFormatted(pastDate);
-
-      expect(result).toBe('Overdue');
-    });
-
-    it('should return hours and minutes for future dates with hours', () => {
-      const futureDate = dayjs().add(2, 'hours').add(30, 'minutes').toISOString();
-
-      const result = getTimeRemainingFormatted(futureDate);
-
-      expect(result).toMatch(/^\d+h \d+m$/);
-    });
-
-    it('should return only minutes for future dates under 1 hour', () => {
-      const futureDate = dayjs().add(45, 'minutes').toISOString();
-
-      const result = getTimeRemainingFormatted(futureDate);
-
-      expect(result).toMatch(/^\d+m$/);
-      expect(result).not.toContain('h');
-    });
-
-    it('should handle edge case of exactly 1 hour', () => {
-      const futureDate = dayjs().add(60, 'minutes').toISOString();
-
-      const result = getTimeRemainingFormatted(futureDate);
-
-      expect(result).toMatch(/^\d+h \d+m$/);
-    });
-
-    it('should handle edge case of less than 1 minute', () => {
-      const futureDate = dayjs().add(30, 'seconds').toISOString();
-
-      const result = getTimeRemainingFormatted(futureDate);
-
-      expect(result).toBe('0m');
-    });
-  });
 });

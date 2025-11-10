@@ -89,19 +89,4 @@ export function isStorageAvailable() {
   }
 }
 
-/**
- * Clear all app data from localStorage
- * @returns {boolean} Success status
- */
-export function clearAllStorage() {
-  try {
-    window.localStorage.removeItem(STORAGE_KEYS.TASKS);
-    window.localStorage.removeItem(STORAGE_KEYS.PREFS);
-    return true;
-  } catch (error) {
-    console.error('Error clearing storage:', error);
-    return false;
-  }
-}
-
 export { STORAGE_KEYS };

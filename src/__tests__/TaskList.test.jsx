@@ -57,7 +57,7 @@ describe('TaskList', () => {
       />
     );
 
-    expect(screen.getByText(/add new task/i)).toBeInTheDocument();
+    expect(screen.getByRole('button', { name: /add new task/i })).toBeInTheDocument();
   });
 
   it('passes callbacks to TaskItem components', () => {

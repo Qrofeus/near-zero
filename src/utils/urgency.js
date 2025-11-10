@@ -20,25 +20,47 @@ export function isOverdue(deadline, now = Date.now()) {
 }
 
 /**
- * Get urgency color based on time remaining
- * Color gradient: green → yellow → orange → red
+ * Get urgency colors based on time remaining
+ * Returns border and background colors using Open Props variables
  * @param {string} deadline - UTC ISO 8601 deadline string
  * @param {number} [now] - Optional current time in ms
- * @returns {string} Hex color code
+ * @returns {object|null} Object with borderColor and backgroundColor, or null for default
  */
 export function getUrgencyColor(deadline, now = Date.now()) {
   const remaining = getTimeRemaining(deadline, now);
   const hoursRemaining = remaining / (60 * 60 * 1000);
 
-  if (hoursRemaining < 1) {
-    return '#ef4444'; // red - overdue or < 1hr
-  } else if (hoursRemaining < 6) {
-    return '#f97316'; // orange - 1-6hr
-  } else if (hoursRemaining < 24) {
-    return '#eab308'; // yellow - 6-24hr
-  } else {
-    return '#22c55e'; // green - > 24hr
+  // Overdue: no urgency coloring (neutral/white)
+  if (remaining < 0) {
+    return null;
   }
+
+  // Critical (<1hr): red border + background
+  if (hoursRemaining < 1) {
+    return {
+      borderColor: 'var(--red-6)',
+      backgroundColor: 'var(--red-1)'
+    };
+  }
+
+  // Warning (1-6hr): orange border + background
+  if (hoursRemaining < 6) {
+    return {
+      borderColor: 'var(--orange-6)',
+      backgroundColor: 'var(--orange-1)'
+    };
+  }
+
+  // Low warning (6-24hr): yellow border + background
+  if (hoursRemaining < 24) {
+    return {
+      borderColor: 'var(--yellow-6)',
+      backgroundColor: 'var(--yellow-1)'
+    };
+  }
+
+  // Safe (>24hr): no urgency coloring (neutral/white)
+  return null;
 }
 
 /**

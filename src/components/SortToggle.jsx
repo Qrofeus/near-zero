@@ -16,6 +16,7 @@ function SortToggle({ currentMode, onModeChange }) {
             ...styles.button,
             ...(currentMode === SORT_MODES.DEADLINE ? styles.buttonActive : {})
           }}
+          className="toggle-button"
           aria-pressed={currentMode === SORT_MODES.DEADLINE}
         >
           Deadline
@@ -27,6 +28,7 @@ function SortToggle({ currentMode, onModeChange }) {
             ...(currentMode === SORT_MODES.PRIORITY ? styles.buttonActive : {}),
             borderRight: 'none'
           }}
+          className="toggle-button"
           aria-pressed={currentMode === SORT_MODES.PRIORITY}
         >
           Priority
@@ -61,8 +63,9 @@ const styles = {
     color: 'var(--accent)',
     backgroundColor: 'var(--bg-primary)',
     border: 'none',
+    borderRadius: '0',
     cursor: 'pointer',
-    transition: 'all 0.2s',
+    transition: 'background-color 0.2s, color 0.2s',
     borderRight: '1px solid var(--accent)',
     outline: 'none'
   },

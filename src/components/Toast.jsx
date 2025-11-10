@@ -28,20 +28,16 @@ function Toast({ isVisible, message, onClose, duration = 3000, variant = 'info' 
 
   const variantStyles = {
     info: {
-      backgroundColor: '#007bff',
-      color: 'white'
+      borderLeftColor: 'var(--blue-6)'
     },
     success: {
-      backgroundColor: '#28a745',
-      color: 'white'
+      borderLeftColor: 'var(--green-6)'
     },
     warning: {
-      backgroundColor: '#ffc107',
-      color: '#333'
+      borderLeftColor: 'var(--yellow-6)'
     },
     danger: {
-      backgroundColor: '#dc3545',
-      color: 'white'
+      borderLeftColor: 'var(--red-6)'
     }
   };
 
@@ -67,7 +63,7 @@ function Toast({ isVisible, message, onClose, duration = 3000, variant = 'info' 
 const styles = {
   toast: {
     position: 'fixed',
-    top: '20px',
+    bottom: '20px',
     right: '20px',
     minWidth: '250px',
     maxWidth: '400px',
@@ -79,7 +75,11 @@ const styles = {
     justifyContent: 'space-between',
     gap: '12px',
     zIndex: 10000,
-    animation: 'slideIn 0.3s ease-out'
+    animation: 'slideIn 0.3s ease-out',
+    backgroundColor: 'var(--bg-primary)',
+    color: 'var(--text-primary)',
+    borderLeft: '4px solid',
+    borderLeftColor: 'var(--stone-6)'
   },
   message: {
     flex: 1,
@@ -88,7 +88,7 @@ const styles = {
   closeButton: {
     background: 'none',
     border: 'none',
-    color: 'inherit',
+    color: 'var(--text-secondary)',
     fontSize: '18px',
     cursor: 'pointer',
     padding: '0',

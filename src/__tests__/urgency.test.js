@@ -65,44 +65,59 @@ describe('urgency utilities', () => {
   });
 
   describe('getUrgencyColor', () => {
-    it('returns red for overdue tasks', () => {
+    it('returns null for overdue tasks', () => {
       const deadline = '2025-10-27T10:00:00Z'; // 2h ago
-      expect(getUrgencyColor(deadline)).toBe('#ef4444'); // red
+      expect(getUrgencyColor(deadline)).toBe(null); // no urgency coloring
     });
 
     it('returns red for tasks due in < 1 hour', () => {
       const deadline = '2025-10-27T12:30:00Z'; // 30min from now
-      expect(getUrgencyColor(deadline)).toBe('#ef4444'); // red
+      expect(getUrgencyColor(deadline)).toEqual({
+        borderColor: 'var(--red-6)',
+        backgroundColor: 'var(--red-1)'
+      });
     });
 
     it('returns orange for tasks due in 1-6 hours', () => {
       const deadline = '2025-10-27T15:00:00Z'; // 3h from now
-      expect(getUrgencyColor(deadline)).toBe('#f97316'); // orange
+      expect(getUrgencyColor(deadline)).toEqual({
+        borderColor: 'var(--orange-6)',
+        backgroundColor: 'var(--orange-1)'
+      });
     });
 
     it('returns yellow for tasks due in 6-24 hours', () => {
       const deadline = '2025-10-27T22:00:00Z'; // 10h from now
-      expect(getUrgencyColor(deadline)).toBe('#eab308'); // yellow
+      expect(getUrgencyColor(deadline)).toEqual({
+        borderColor: 'var(--yellow-6)',
+        backgroundColor: 'var(--yellow-1)'
+      });
     });
 
-    it('returns green for tasks due in > 24 hours', () => {
+    it('returns null for tasks due in > 24 hours', () => {
       const deadline = '2025-10-28T15:00:00Z'; // 27h from now
-      expect(getUrgencyColor(deadline)).toBe('#22c55e'); // green
+      expect(getUrgencyColor(deadline)).toBe(null); // no urgency coloring
     });
 
     it('handles edge case: exactly 1 hour', () => {
       const deadline = '2025-10-27T13:00:00Z'; // exactly 1h from now
-      expect(getUrgencyColor(deadline)).toBe('#f97316'); // orange
+      expect(getUrgencyColor(deadline)).toEqual({
+        borderColor: 'var(--orange-6)',
+        backgroundColor: 'var(--orange-1)'
+      });
     });
 
     it('handles edge case: exactly 6 hours', () => {
       const deadline = '2025-10-27T18:00:00Z'; // exactly 6h from now
-      expect(getUrgencyColor(deadline)).toBe('#eab308'); // yellow
+      expect(getUrgencyColor(deadline)).toEqual({
+        borderColor: 'var(--yellow-6)',
+        backgroundColor: 'var(--yellow-1)'
+      });
     });
 
     it('handles edge case: exactly 24 hours', () => {
       const deadline = '2025-10-28T12:00:00Z'; // exactly 24h from now
-      expect(getUrgencyColor(deadline)).toBe('#22c55e'); // green
+      expect(getUrgencyColor(deadline)).toBe(null); // no urgency coloring
     });
   });
 

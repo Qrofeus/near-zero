@@ -4,6 +4,7 @@
  * Dynamically shows only available density options based on viewport width
  */
 
+import { GoRows } from 'react-icons/go';
 import { DENSITY_MODES } from '../utils/density';
 
 /**
@@ -18,17 +19,17 @@ function DensityControl({ currentDensity, onDensityChange, availableDensities = 
   const densityButtons = [
     {
       mode: DENSITY_MODES.COMPACT,
-      icon: '⊞⊞⊞',
+      icon: <><GoRows /><GoRows /><GoRows /></>,
       label: 'Compact view'
     },
     {
       mode: DENSITY_MODES.COMFORTABLE,
-      icon: '⊞⊞',
+      icon: <><GoRows /><GoRows /></>,
       label: 'Comfortable view'
     },
     {
       mode: DENSITY_MODES.SPACIOUS,
-      icon: '⊞',
+      icon: <GoRows />,
       label: 'Spacious view'
     }
   ];
@@ -48,6 +49,7 @@ function DensityControl({ currentDensity, onDensityChange, availableDensities = 
                 ...(currentDensity === btn.mode ? styles.activeButton : {}),
                 ...(index === array.length - 1 ? { borderRight: 'none' } : {})
               }}
+              className="toggle-button"
               aria-label={btn.label}
             >
               {btn.icon}
@@ -83,15 +85,19 @@ const styles = {
     backgroundColor: 'var(--bg-primary)',
     color: 'var(--accent)',
     border: 'none',
+    borderRadius: '0',
     borderRight: '1px solid var(--accent)',
     cursor: 'pointer',
     fontWeight: '500',
     outline: 'none',
-    transition: 'all 0.2s'
+    transition: 'background-color 0.2s, color 0.2s',
+    display: 'flex',
+    alignItems: 'center',
+    // gap: '2px'
   },
   activeButton: {
     backgroundColor: 'var(--accent)',
-    color: '#fff',
+    color: 'var(--stone-0)',
     fontWeight: '600'
   }
 };

@@ -16,19 +16,19 @@ function Banner({ isVisible, message, variant = 'info', dismissible = false, onD
 
   const variantStyles = {
     info: {
-      backgroundColor: '#cce5ff',
-      color: '#004085',
-      borderColor: '#b8daff'
+      backgroundColor: 'var(--blue-1)',
+      color: 'var(--blue-11)',
+      borderColor: 'var(--blue-6)'
     },
     warning: {
-      backgroundColor: '#fff3cd',
-      color: '#856404',
-      borderColor: '#ffeaa7'
+      backgroundColor: 'var(--yellow-1)',
+      color: 'var(--yellow-11)',
+      borderColor: 'var(--yellow-6)'
     },
     danger: {
-      backgroundColor: '#f8d7da',
-      color: '#721c24',
-      borderColor: '#f5c6cb'
+      backgroundColor: 'var(--red-1)',
+      color: 'var(--red-11)',
+      borderColor: 'var(--red-6)'
     }
   };
 
@@ -62,8 +62,12 @@ const styles = {
     justifyContent: 'center',
     gap: '12px',
     fontSize: '14px',
-    borderBottom: '1px solid',
-    position: 'relative'
+    borderTop: '1px solid',
+    position: 'fixed',
+    bottom: 0,
+    left: 0,
+    right: 0,
+    zIndex: 998
   },
   message: {
     textAlign: 'center',

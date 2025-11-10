@@ -201,11 +201,8 @@ function TaskForm({ onSubmit, task = null }) {
 // Basic inline styles for the form
 const styles = {
   form: {
-    backgroundColor: 'var(--bg-secondary)',
-    padding: '20px',
-    borderRadius: '8px',
-    marginBottom: '20px',
-    border: '1px solid var(--border-primary)'
+    padding: '0',
+    marginBottom: '0'
   },
   field: {
     marginBottom: '15px',
@@ -255,7 +252,7 @@ const styles = {
     padding: '10px 20px',
     fontSize: '16px',
     fontWeight: 'bold',
-    color: '#fff',
+    color: 'var(--stone-0)',
     backgroundColor: 'var(--accent)',
     border: '2px solid transparent',
     borderRadius: '4px',

@@ -60,24 +60,6 @@ export function isInPast(utcString) {
 }
 
 /**
- * Get time remaining until deadline
- * @param {string} utcString - UTC ISO 8601 string
- * @returns {number} Milliseconds until deadline (negative if overdue)
- */
-export function getTimeRemaining(utcString) {
-  return dayjs(utcString).diff(dayjs());
-}
-
-/**
- * Format deadline as relative time (e.g., "in 3 hours", "2 days ago")
- * @param {string} utcString - UTC ISO 8601 string
- * @returns {string} Relative time string
- */
-export function formatRelativeTime(utcString) {
-  return dayjs(utcString).fromNow();
-}
-
-/**
  * Format deadline as absolute local time
  * @param {string} utcString - UTC ISO 8601 string
  * @param {string} format - Format string (default: 'MMM D, YYYY h:mm A')
@@ -85,26 +67,4 @@ export function formatRelativeTime(utcString) {
  */
 export function formatAbsoluteTime(utcString, format = 'MMM D, YYYY h:mm A') {
   return dayjs(utcString).local().format(format);
-}
-
-/**
- * Get time remaining in human-readable format (e.g., "3h 20m")
- * @param {string} utcString - UTC ISO 8601 string
- * @returns {string} Time remaining string
- */
-export function getTimeRemainingFormatted(utcString) {
-  const ms = getTimeRemaining(utcString);
-
-  if (ms < 0) {
-    return 'Overdue';
-  }
-
-  const totalMinutes = Math.floor(ms / 60000);
-  const hours = Math.floor(totalMinutes / 60);
-  const minutes = totalMinutes % 60;
-
-  if (hours > 0) {
-    return `${hours}h ${minutes}m`;
-  }
-  return `${minutes}m`;
 }

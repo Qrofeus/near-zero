@@ -11,7 +11,6 @@ describe('AddTaskBlock', () => {
   it('renders add task button', () => {
     render(<AddTaskBlock onAddTask={() => {}} />);
 
-    expect(screen.getByText(/add new task/i)).toBeInTheDocument();
     expect(screen.getByRole('button', { name: /add new task/i })).toBeInTheDocument();
   });
 

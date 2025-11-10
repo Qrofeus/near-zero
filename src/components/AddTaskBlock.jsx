@@ -1,3 +1,5 @@
+import { GoPlus } from 'react-icons/go';
+
 /**
  * AddTaskBlock Component
  * Transparent block with dashed border that opens task creation form when clicked
@@ -14,44 +16,36 @@ function AddTaskBlock({ onAddTask }) {
     <button
       onClick={onAddTask}
       style={styles.block}
+      className="add-task-block"
       aria-label="Add new task (press Q)"
     >
-      <span style={styles.icon}>+</span>
-      <span style={styles.text}>Add New Task (Q)</span>
+      <GoPlus style={styles.icon} />
     </button>
   );
 }
 
 const styles = {
   block: {
-    // Make it look like a task card but with dashed border
     backgroundColor: 'transparent',
     border: '2px dashed var(--accent)',
     borderRadius: '8px',
-    padding: '15px',
     cursor: 'pointer',
     display: 'flex',
-    flexDirection: 'column',
+    flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'center',
-    gap: '8px',
+    gap: '6px',
     transition: 'all 0.2s',
-    // Remove default button styles
     outline: 'none',
-    width: '100%', // Fill grid track
-    transform: 'scale(1)',
+    padding: '15px',
+    minHeight: '120px',
+    width: '100%',
+    alignSelf: 'start'
   },
   icon: {
-    fontSize: '36px',
+    fontSize: '32px',
     color: 'var(--accent)',
-    fontWeight: 'bold',
-    lineHeight: 1
   },
-  text: {
-    fontSize: '16px',
-    color: 'var(--accent)',
-    fontWeight: 'bold'
-  }
 };
 
 export default AddTaskBlock;

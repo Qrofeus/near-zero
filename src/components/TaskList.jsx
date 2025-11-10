@@ -6,6 +6,8 @@
  * Supports multi-column responsive layout based on density
  */
 
+import { useState } from 'react';
+import { GoChevronUp, GoChevronDown } from 'react-icons/go';
 import TaskItem from './TaskItem';
 import AddTaskBlock from './AddTaskBlock';
 import { isOverdue } from '../utils/urgency';
@@ -25,6 +27,9 @@ function TaskList({ tasks, onClick, onDelete, onComplete, onAddTask, density = D
   // Separate tasks into overdue and upcoming
   const overdueTasks = tasks.filter(task => isOverdue(task.deadline));
   const upcomingTasks = tasks.filter(task => !isOverdue(task.deadline));
+
+  // State for collapsing overdue section
+  const [isOverdueOpen, setIsOverdueOpen] = useState(true);
 
   // Get grid columns based on density
   // Fixed column counts with min/max widths - user controls 1, 2, or 3 columns
@@ -63,22 +68,35 @@ function TaskList({ tasks, onClick, onDelete, onComplete, onAddTask, density = D
       {/* Overdue tasks section */}
       {overdueTasks.length > 0 && (
         <div style={styles.section}>
-          <h2 style={styles.sectionHeader}>Overdue</h2>
-          <div style={gridStyle}>
-            {overdueTasks.map((task) => (
-              <TaskItem
-                key={task.id}
-                task={task}
-                onClick={onClick}
-                onDelete={onDelete}
-                onComplete={onComplete}
-              />
-            ))}
-            {/* Show AddTaskBlock here if no upcoming tasks */}
-            {upcomingTasks.length === 0 && (
-              <AddTaskBlock onAddTask={onAddTask} />
+          <details open={isOverdueOpen} style={styles.details}>
+            <summary
+              onClick={(e) => {
+                e.preventDefault();
+                setIsOverdueOpen(!isOverdueOpen);
+              }}
+              style={styles.sectionHeader}
+            >
+              <span>Overdue</span>
+              <span style={styles.arrow}>{isOverdueOpen ? <GoChevronUp /> : <GoChevronDown />}</span>
+            </summary>
+            {isOverdueOpen && (
+              <div style={gridStyle}>
+                {overdueTasks.map((task) => (
+                  <TaskItem
+                    key={task.id}
+                    task={task}
+                    onClick={onClick}
+                    onDelete={onDelete}
+                    onComplete={onComplete}
+                  />
+                ))}
+                {/* Show AddTaskBlock here if no upcoming tasks */}
+                {upcomingTasks.length === 0 && (
+                  <AddTaskBlock onAddTask={onAddTask} />
+                )}
+              </div>
             )}
-          </div>
+          </details>
         </div>
       )}
 
@@ -117,10 +135,15 @@ function TaskList({ tasks, onClick, onDelete, onComplete, onAddTask, density = D
 const styles = {
   list: {
     display: 'flex',
-    flexDirection: 'column'
+    flexDirection: 'column',
+    paddingBottom: '160px',
   },
   section: {
-    marginBottom: '20px'
+    marginBottom: '20px',
+  },
+  details: {
+    width: '100%',
+    backgroundColor: 'transparent'
   },
   sectionHeader: {
     fontSize: '20px',
@@ -128,8 +151,22 @@ const styles = {
     color: 'var(--text-primary)',
     marginBottom: '15px',
     marginTop: '10px',
+      paddingInline: '10px',
     paddingBottom: '8px',
-    borderBottom: '2px solid var(--border-primary)'
+    borderBottom: '2px solid var(--border-primary)',
+    borderRadius: 0,
+    cursor: 'pointer',
+    listStyle: 'none',
+    display: 'flex',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    minWidth: '100%',
+    backgroundColor: 'transparent'
+  },
+  arrow: {
+    fontSize: '16px',
+    color: 'var(--text-secondary)',
+    userSelect: 'none'
   }
 };
 

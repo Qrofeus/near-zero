@@ -112,7 +112,7 @@ const styles = {
   },
   primaryButton: {
     backgroundColor: 'var(--accent)',
-    color: '#fff'
+    color: 'var(--stone-0)'
   },
   warningButton: {
     backgroundColor: 'var(--warning)',
@@ -120,7 +120,7 @@ const styles = {
   },
   dangerButton: {
     backgroundColor: 'var(--error)',
-    color: '#fff'
+    color: 'var(--stone-0)'
   }
 };
 

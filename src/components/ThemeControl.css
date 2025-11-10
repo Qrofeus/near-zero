@@ -22,7 +22,7 @@
   align-items: center;
   gap: 4px;
   padding: 12px 8px;
-  background: var(--bg-secondary);
+  background: var(--bg-tertiary);
   border: 2px solid transparent;
   border-radius: 8px;
   cursor: pointer;
@@ -32,6 +32,7 @@
 
 .theme-button:hover {
   background: var(--bg-hover);
+    border-color: var(--text-primary);
 }
 
 .theme-button.active {
@@ -48,15 +49,9 @@
 .theme-icon {
   font-size: 24px;
   line-height: 1;
+  color: var(--text-primary);
 }
 
 .theme-label {
-  font-size: 12px;
-  font-weight: 500;
-  color: var(--text-secondary);
-}
-
-.theme-button.active .theme-label {
-  color: var(--text-primary);
-  font-weight: 600;
+  display: none;
 }

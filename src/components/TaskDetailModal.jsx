@@ -38,24 +38,24 @@ function TaskDetailModal({ isOpen, task, onClose, onEdit, onDelete }) {
   };
 
   /**
-   * Get priority color
+   * Get priority color using Open Props
    * @param {number} priority
    * @returns {string}
    */
   const getPriorityColor = (priority) => {
     switch (priority) {
       case 1:
-        return '#dc2626'; // Red - high priority
+        return 'var(--red-6)'; // High priority
       case 2:
-        return '#ea580c'; // Orange - medium priority
+        return 'var(--orange-6)'; // Medium priority
       case 3:
-        return '#16a34a'; // Green - low priority
+        return 'var(--green-6)'; // Low priority
       default:
-        return '#6c757d'; // Gray - default
+        return 'var(--stone-6)'; // Default
     }
   };
 
-  const urgencyColor = getUrgencyColor(task.deadline);
+  const urgencyColors = getUrgencyColor(task.deadline);
   const relativeTime = formatRelativeTime(task.deadline);
   const absoluteTime = formatAbsoluteTime(task.deadline);
 
@@ -96,8 +96,10 @@ function TaskDetailModal({ isOpen, task, onClose, onEdit, onDelete }) {
 
         {/* Deadline */}
         <div style={styles.section}>
-          <h3 style={styles.sectionTitle}>Deadline</h3>
-          <div style={{ ...styles.relativeTime, color: urgencyColor }}>
+          <div style={{
+            ...styles.relativeTime,
+            color: urgencyColors ? urgencyColors.borderColor : 'var(--text-primary)'
+          }}>
             {relativeTime}
           </div>
           <div style={styles.absoluteTime}>
@@ -161,7 +163,7 @@ const styles = {
     display: 'inline-block',
     padding: '6px 12px',
     borderRadius: '4px',
-    color: '#fff',
+    color: 'var(--stone-0)',
     fontSize: '14px',
     fontWeight: 'bold'
   },
@@ -207,11 +209,11 @@ const styles = {
   },
   editButton: {
     backgroundColor: 'var(--accent)',
-    color: '#fff'
+    color: 'var(--stone-0)'
   },
   deleteButton: {
     backgroundColor: 'var(--error)',
-    color: '#fff'
+    color: 'var(--stone-0)'
   }
 };
 

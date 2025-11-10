@@ -1,3 +1,4 @@
+import { GoSun, GoMoon, GoDeviceDesktop } from 'react-icons/go';
 import { THEME_MODES } from '../utils/theme';
 import './ThemeControl.css';
 
@@ -10,9 +11,9 @@ import './ThemeControl.css';
  */
 export default function ThemeControl({ currentTheme, onThemeChange }) {
   const themes = [
-    { value: THEME_MODES.LIGHT, label: 'Light', icon: '☀️' },
-    { value: THEME_MODES.DARK, label: 'Dark', icon: '🌙' },
-    { value: THEME_MODES.SYSTEM, label: 'System', icon: '💻' },
+    { value: THEME_MODES.LIGHT, label: 'Light', icon: <GoSun /> },
+    { value: THEME_MODES.DARK, label: 'Dark', icon: <GoMoon /> },
+    { value: THEME_MODES.SYSTEM, label: 'System', icon: <GoDeviceDesktop /> },
   ];
 
   const handleThemeClick = (themeValue) => {

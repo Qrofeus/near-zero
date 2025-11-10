@@ -30,8 +30,7 @@ function HelpModal({ isOpen, onClose }) {
           <section style={styles.section}>
             <h3 style={styles.sectionTitle}>Overview</h3>
             <p style={styles.text}>
-              <strong>NearZero</strong> is a privacy-first task manager focused on deadline tracking.
-              All data stays on your device—no accounts, no servers, no cloud sync.
+              <strong>NearZero</strong> is a privacy-first task manager focused on deadline tracking. All data stays on your device - no accounts, no servers, no cloud sync.
             </p>
           </section>
 
@@ -235,9 +234,6 @@ const styles = {
   },
   section: {
     marginBottom: '24px',
-    '&:last-child': {
-      marginBottom: 0
-    }
   },
   sectionTitle: {
     fontSize: '18px',
@@ -250,7 +246,8 @@ const styles = {
     fontSize: '15px',
     color: 'var(--text-primary)',
     margin: 0,
-    lineHeight: '1.6'
+    lineHeight: '1.6',
+      minWidth: '100%',
   },
   list: {
     margin: 0,
@@ -260,10 +257,10 @@ const styles = {
   },
   listItem: {
     marginBottom: '8px',
-    lineHeight: '1.6'
+    lineHeight: '1.6',
+      minWidth: '100%',
   },
   kbd: {
-    display: 'inline-block',
     padding: '2px 6px',
     fontSize: '13px',
     fontFamily: 'monospace',

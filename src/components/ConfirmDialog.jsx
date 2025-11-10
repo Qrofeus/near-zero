@@ -124,11 +124,11 @@ const styles = {
   },
   confirmButton: {
     backgroundColor: 'var(--accent)',
-    color: '#fff'
+    color: 'var(--stone-0)'
   },
   dangerButton: {
     backgroundColor: 'var(--error)',
-    color: '#fff'
+    color: 'var(--stone-0)'
   }
 };
 

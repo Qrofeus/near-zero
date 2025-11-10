@@ -6,8 +6,7 @@ import { describe, it, expect, beforeEach, vi } from 'vitest';
 import {
   DENSITY_MODES,
   getDensity,
-  setDensity,
-  getColumnsForDensity
+  setDensity
 } from '../utils/density';
 
 // Mock localStorage
@@ -137,25 +136,4 @@ describe('Density Utilities', () => {
     });
   });
 
-  describe('getColumnsForDensity', () => {
-    it('returns correct columns for compact mode', () => {
-      const columns = getColumnsForDensity(DENSITY_MODES.COMPACT);
-      expect(columns).toBeGreaterThanOrEqual(3);
-    });
-
-    it('returns correct columns for comfortable mode', () => {
-      const columns = getColumnsForDensity(DENSITY_MODES.COMFORTABLE);
-      expect(columns).toBe(2);
-    });
-
-    it('returns correct columns for spacious mode', () => {
-      const columns = getColumnsForDensity(DENSITY_MODES.SPACIOUS);
-      expect(columns).toBe(1);
-    });
-
-    it('returns default for invalid mode', () => {
-      const columns = getColumnsForDensity('INVALID');
-      expect(columns).toBe(2); // comfortable default
-    });
-  });
 });

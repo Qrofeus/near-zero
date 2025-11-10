@@ -82,9 +82,15 @@ export function resolveTheme(preference) {
 
 /**
  * Apply theme to document
+ * Uses CSS color-scheme for Open Props light-dark() function
  * @param {'light' | 'dark' | 'system'} theme - Theme to apply
  */
 export function applyTheme(theme) {
   const resolved = resolveTheme(theme);
+
+  // Set color-scheme for Open Props light-dark() function
+  document.documentElement.style.colorScheme = resolved;
+
+  // Also set data-theme for backward compatibility
   document.documentElement.setAttribute('data-theme', resolved);
 }

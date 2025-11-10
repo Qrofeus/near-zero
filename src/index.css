@@ -1,103 +1,60 @@
 /* Global styles for NearZero application */
 
-/* CSS Variables for Theme System */
-:root[data-theme="light"] {
-  /* Background colors */
-  --bg-primary: #ffffff;
-  --bg-secondary: #f7fafc;
-  --bg-tertiary: #edf2f7;
-  --bg-hover: #e2e8f0;
-  --bg-active: #cbd5e0;
+/* Import Open Props */
+@import "open-props/style";
+@import "open-props/normalize";
 
-  /* Text colors */
-  --text-primary: #1a202c;
-  --text-secondary: #4a5568;
-  --text-tertiary: #718096;
-  --text-inverse: #ffffff;
-
-  /* Border colors */
-  --border-primary: #e2e8f0;
-  --border-secondary: #cbd5e0;
-  --border-focus: #4299e1;
-
-  /* Accent colors */
-  --accent: #2563eb;
-  --accent-hover: #1d4ed8;
-  --accent-active: #1e40af;
-
-  /* Status colors */
-  --success: #16a34a;
-  --warning: #ea580c;
-  --error: #dc2626;
-  --info: #2563eb;
-
-  /* Urgency gradient colors */
-  --urgency-safe: #16a34a;
-  --urgency-moderate: #eab308;
-  --urgency-warning: #ea580c;
-  --urgency-critical: #dc2626;
-
-  /* Shadow colors */
-  --shadow-sm: rgba(0, 0, 0, 0.05);
-  --shadow-md: rgba(0, 0, 0, 0.1);
-  --shadow-lg: rgba(0, 0, 0, 0.15);
-
-  /* Scrollbar colors */
-  --scrollbar-track: #f7fafc;
-  --scrollbar-thumb: #cbd5e0;
-  --scrollbar-thumb-hover: #a0aec0;
-}
-
-:root[data-theme="dark"] {
-  /* Background colors */
-  --bg-primary: #1e2936;
-  --bg-secondary: #2d3748;
-  --bg-tertiary: #4a5568;
-  --bg-hover: #374151;
-  --bg-active: #4b5563;
-
-  /* Text colors */
-  --text-primary: #f9fafb;
-  --text-secondary: #e5e7eb;
-  --text-tertiary: #d1d5db;
-  --text-inverse: #1a202c;
-
-  /* Border colors */
-  --border-primary: #4b5563;
-  --border-secondary: #374151;
-  --border-focus: #60a5fa;
-
-  /* Accent colors */
-  --accent: #63b3ed;
-  --accent-hover: #4299e1;
-  --accent-active: #3182ce;
-
-  /* Status colors */
-  --success: #68d391;
-  --warning: #f6ad55;
-  --error: #fc8181;
-  --info: #63b3ed;
-
-  /* Urgency gradient colors */
-  --urgency-safe: #68d391;
-  --urgency-moderate: #f6e05e;
-  --urgency-warning: #f6ad55;
-  --urgency-critical: #fc8181;
-
-  /* Shadow colors */
-  --shadow-sm: rgba(0, 0, 0, 0.2);
-  --shadow-md: rgba(0, 0, 0, 0.3);
-  --shadow-lg: rgba(0, 0, 0, 0.4);
-
-  /* Scrollbar colors */
-  --scrollbar-track: #2d3748;
-  --scrollbar-thumb: #4a5568;
-  --scrollbar-thumb-hover: #718096;
-}
-
-/* Default to light theme if data-theme not set */
+/* Color scheme setup for light/dark themes */
 :root {
   color-scheme: light dark;
+}
+
+/* Font family */
+body {
+  font-family: 'Inter', 'Roboto', -apple-system, BlinkMacSystemFont, 'Segoe UI', system-ui, sans-serif;
+}
+
+/* Custom semantic color aliases using Open Props */
+:root {
+  /* Background colors */
+  --bg-primary: light-dark(var(--stone-0), var(--stone-10));
+  --bg-secondary: light-dark(var(--stone-1), var(--stone-9));
+  --bg-tertiary: light-dark(var(--stone-2), var(--stone-8));
+  --bg-hover: light-dark(var(--stone-2), var(--stone-8));
+  --bg-active: light-dark(var(--stone-3), var(--stone-7));
+
+  /* Text colors */
+  --text-primary: light-dark(var(--stone-12), var(--stone-1));
+  --text-secondary: light-dark(var(--stone-10), var(--stone-3));
+  --text-tertiary: light-dark(var(--stone-9), var(--stone-5));
+  --text-inverse: light-dark(var(--stone-0), var(--stone-12));
+
+  /* Border colors */
+  --border-primary: light-dark(var(--stone-4), var(--stone-7));
+  --border-secondary: light-dark(var(--stone-5), var(--stone-6));
+  --border-focus: light-dark(var(--blue-6), var(--blue-5));
+
+  /* Accent colors */
+  --accent: var(--blue-6);
+  --accent-hover: var(--blue-4);
+    --accent-hover-low: var(--blue-2);
+  --accent-active: var(--blue-8);
+
+  /* Status colors */
+  --success: var(--green-6);
+  --warning: var(--orange-6);
+  --error: var(--red-6);
+  --info: var(--blue-6);
+
+  /* Shadows */
+  --shadow-sm: var(--shadow-2);
+  --shadow-md: var(--shadow-3);
+  --shadow-lg: var(--shadow-6);
+
+  /* Scrollbar colors */
+  --scrollbar-track: light-dark(var(--stone-1), var(--stone-9));
+  --scrollbar-thumb: light-dark(var(--stone-5), var(--stone-6));
+  --scrollbar-thumb-hover: light-dark(var(--stone-6), var(--stone-5));
 }
 
 /* CSS Reset: Apply box-sizing and reset margins/padding */
@@ -111,23 +68,62 @@
 
 /* Buttons: Hover effects */
 button:hover {
-  transform: scale(1.05);
   filter: brightness(1.1);
-  box-shadow: 0 4px 8px var(--shadow-md);
+}
+
+/* Toggle buttons: No scale or filter on hover */
+.toggle-button:hover {
+  transform: none !important;
+  filter: none !important;
+  background-color: var(--accent-hover) !important;
+  color: var(--stone-0) !important;
 }
 
 /* Buttons: Scale up with inset outline on focus */
 button:focus {
-  transform: scale(1.05);
   box-shadow: inset 0 0 0 2px var(--border-focus) !important;
   transition: all 100ms;
   outline: none;
+}
+
+/* Toggle buttons: No scale on focus */
+.toggle-button:focus {
+  transform: none !important;
 }
 
 /* Button active state */
 button:active {
   transform: scale(0.98);
   transition: all 50ms;
+}
+
+/* Toggle buttons: No scale on active */
+.toggle-button:active {
+  transform: none !important;
+}
+
+/* Add task block: Accent-hover on hover */
+.add-task-block:hover {
+  background-color: var(--accent-hover-low) !important;
+}
+
+.add-task-block:hover span {
+  color: var(--stone-0) !important;
+}
+
+/* Remove default details/summary marker */
+summary {
+  list-style: none;
+  background-color: transparent;
+}
+
+summary::-webkit-details-marker {
+  display: none;
+}
+
+/* Remove default details background */
+details {
+  background-color: transparent;
 }
 
 /* Input fields: Solid outline (no scaling) */
@@ -189,7 +185,7 @@ select:focus {
   }
   50% {
     transform: scale(1.02);
-    box-shadow: 0 4px 8px rgba(239, 68, 68, 0.3);
+    box-shadow: 0 4px 8px var(--red-5-hsl);
   }
 }
 
